@@ -205,12 +205,13 @@ Orchestrix/
 
 | Feature | Status |
 |:--------|:-------|
+| Core Abstractions | ✅ Completed |
 | Immediate Jobs | 🔲 Planned |
 | Delayed Jobs | 🔲 Planned |
 | Cron Jobs | 🔲 Planned |
 | Interval Jobs | 🔲 Planned |
-| Job Priorities | 🔲 Planned |
-| Retry Policies | 🔲 Planned |
+| Job Priorities | ✅ Foundation Ready |
+| Retry Policies | ✅ Foundation Ready |
 | Dead Letter Queue | 🔲 Planned |
 | Job Cancellation | 🔲 Planned |
 | Progress Tracking | 🔲 Planned |
@@ -218,6 +219,11 @@ Orchestrix/
 | HA Coordinator | 🔲 Planned |
 | Graceful Shutdown | 🔲 Planned |
 | Admin Dashboard | 🔲 Planned |
+
+**Legend:**
+- ✅ Completed - Feature fully implemented
+- ✅ Foundation Ready - Core types/abstractions ready
+- 🔲 Planned - Not yet started
 
 ---
 

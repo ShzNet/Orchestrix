@@ -10,6 +10,29 @@
 
 ---
 
+## Folder Structure
+
+```
+src/Api/Orchestrix.ServiceApi/
+├── Orchestrix.ServiceApi.csproj
+└── Orchestrix/
+    └── ServiceApi/
+        ├── Controllers/
+        │   ├── JobsController.cs
+        │   └── SchedulesController.cs
+        ├── DTOs/
+        │   ├── EnqueueRequest.cs
+        │   └── EnqueueResult.cs
+        ├── ServiceCollectionExtensions.cs
+        └── EndpointRouteBuilderExtensions.cs
+```
+
+**Namespaces:**
+- `Orchestrix.ServiceApi.Controllers` - API controllers
+- `Orchestrix.ServiceApi.DTOs` - Request/Response DTOs
+
+---
+
 ## Concept
 
 ```

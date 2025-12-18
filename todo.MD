@@ -10,7 +10,7 @@
 | Phase | Package | Status |
 |:------|:--------|:-------|
 | 0 | Project Setup | ✅ Done |
-| 1 | `Orchestrix.Abstractions` | 🔲 TODO |
+| 1 | `Orchestrix.Abstractions` | ✅ Done |
 | 2 | `Orchestrix.Transport.*` | 🔲 TODO |
 | 3 | `Orchestrix.Locking.*` | 🔲 TODO |
 | 4 | `Orchestrix.Coordinator.*` | 🔲 TODO |
@@ -26,6 +26,52 @@
 
 ---
 
+## Project Rules
+
+### Namespace Structure
+
+All projects follow a consistent namespace structure:
+
+1. **Empty RootNamespace**: All `.csproj` files must have `<RootNamespace/>` (empty)
+2. **Folder-based Namespaces**: Namespaces automatically follow folder structure
+3. **Root Folder**: All code files must be inside a root folder matching the project's base namespace
+
+**Example Structure:**
+
+```
+src/Orchestrix.Abstractions/
+├── Orchestrix.Abstractions.csproj  (with <RootNamespace/>)
+├── Orchestrix/                      (root namespace folder)
+│   ├── Enums/                       → namespace Orchestrix.Enums
+│   ├── Interfaces/                  → namespace Orchestrix.Interfaces
+│   ├── DTOs/                        → namespace Orchestrix.DTOs
+│   └── Attributes/                  → namespace Orchestrix.Attributes
+└── Polyfills/                       (exception: System.* namespaces)
+```
+
+**Benefits:**
+- Easy to extend with new namespaces (just create new folders)
+- Namespace matches folder structure automatically
+- Consistent across all projects
+- No manual namespace configuration needed
+
+### Project Configuration
+
+All projects inherit from `Directory.Build.props`:
+- `ImplicitUsings`: enabled
+- `Nullable`: enabled
+- `LangVersion`: latest
+- `TreatWarningsAsErrors`: true
+- `GenerateDocumentationFile`: true
+
+### Package Management
+
+- **Central Package Management** (CPM) enabled via `Directory.Packages.props`
+- All package versions defined centrally
+- Projects reference packages without version numbers
+
+---
+
 ## Phase Details
 
 ### Phase 0: Project Setup ✅
@@ -33,12 +79,12 @@
 - [x] `Directory.Build.props`, `Directory.Packages.props`
 - [x] Folder structure: `src/`, `docs/`, `tasks/`
 
-### Phase 1: Abstractions
+### Phase 1: Abstractions ✅
 > 📄 [`tasks/phase-1-abstractions.md`](./tasks/phase-1-abstractions.md)
-- [ ] Core enums (JobStatus, JobPriority, LogLevel)
-- [ ] Core interfaces (IJobContext, IJobHandler)
-- [ ] DTOs (JobInfo, ScheduleInfo, RetryPolicy)
-- [ ] Attributes (JobHandlerAttribute)
+- [x] Core enums (JobStatus, JobPriority, LogLevel)
+- [x] Job types (JobInfo, IJobContext)
+- [x] Schedule types (ScheduleInfo, RetryPolicy)
+- [x] Polyfills for netstandard2.1 compatibility
 
 ### Phase 2: Transport
 > 📄 [`tasks/phase-2-transport.md`](./tasks/phase-2-transport.md)
@@ -181,242 +227,67 @@ Orchestrix/
 │   └── phase-12-sample.md
 │
 ├── src/
+│   ├── Orchestrix.Abstractions/                    # Phase 1
 │   │
-│   ├── Orchestrix.Abstractions/
-│   │   ├── JobStatus.cs
-│   │   ├── JobPriority.cs
-│   │   ├── LogLevel.cs
-│   │   ├── IJobContext.cs
-│   │   ├── IJobHandler.cs
-│   │   ├── JobInfo.cs
-│   │   ├── ScheduleInfo.cs
-│   │   └── JobHandlerAttribute.cs
-│   │
-│   ├── Transport/
+│   ├── Transport/                                   # Phase 2
 │   │   ├── Orchestrix.Transport.Abstractions/
-│   │   │   ├── ITransport.cs
-│   │   │   ├── IPublisher.cs
-│   │   │   ├── ISubscriber.cs
-│   │   │   ├── SubscriptionOptions.cs
-│   │   │   ├── IMessageSerializer.cs
-│   │   │   ├── JsonMessageSerializer.cs
-│   │   │   ├── MessageEnvelope.cs
-│   │   │   ├── TransportChannels.cs
-│   │   │   └── Messages/
-│   │   │       ├── JobEnqueueMessage.cs
-│   │   │       ├── JobAssignedMessage.cs
-│   │   │       ├── JobDispatchMessage.cs
-│   │   │       ├── JobCancelMessage.cs
-│   │   │       ├── JobStatusMessage.cs
-│   │   │       ├── JobLogMessage.cs
-│   │   │       ├── JobResultMessage.cs
-│   │   │       ├── JobHandoffMessage.cs
-│   │   │       ├── JobHandoffAckMessage.cs
-│   │   │       ├── WorkerHeartbeatMessage.cs
-│   │   │       ├── WorkerRegistrationMessage.cs
-│   │   │       └── CoordinatorHeartbeatMessage.cs
-│   │   │
 │   │   ├── Orchestrix.Transport.Redis/
-│   │   │   ├── RedisTransport.cs
-│   │   │   ├── RedisPublisher.cs
-│   │   │   ├── RedisSubscriber.cs
-│   │   │   ├── RedisTransportOptions.cs
-│   │       └── ServiceCollectionExtensions.cs
+│   │   ├── Orchestrix.Transport.RabbitMQ/
+│   │   └── Orchestrix.Transport.Kafka/
 │   │
-│   ├── Locking/
+│   ├── Locking/                                     # Phase 3
 │   │   ├── Orchestrix.Locking.Abstractions/
-│   │   │   ├── IDistributedLock.cs
-│   │   │   ├── IDistributedLockProvider.cs
-│   │   │   └── DistributedLockOptions.cs
-│   │   │
 │   │   ├── Orchestrix.Locking.InMemory/
-│   │   │   ├── InMemoryLock.cs
-│   │   │   ├── InMemoryLockProvider.cs
-│   │   │   └── ServiceCollectionExtensions.cs
-│   │   │
 │   │   └── Orchestrix.Locking.Redis/
-│   │       ├── RedisLock.cs
-│   │       ├── RedisLockProvider.cs
-│   │       ├── RedisLockOptions.cs
-│   │       └── ServiceCollectionExtensions.cs
 │   │
-│   ├── Coordinator/
+│   ├── Coordinator/                                 # Phase 4
 │   │   ├── Orchestrix.Coordinator.Abstractions/
-│   │   │   ├── CoordinatorOptions.cs
-│   │   │   └── ICoordinatorBuilder.cs
-│   │   │
 │   │   ├── Orchestrix.Coordinator.Persistence.Abstractions/
-│   │   │   ├── Entities/
-│   │   │   │   ├── JobEntity.cs
-│   │   │   │   ├── JobHistoryEntity.cs
-│   │   │   │   ├── CronScheduleEntity.cs
-│   │   │   │   ├── IntervalScheduleEntity.cs
-│   │   │   │   ├── WorkerEntity.cs
-│   │   │   │   ├── CoordinatorNodeEntity.cs
-│   │   │   │   └── LogEntry.cs
-│   │   │   ├── IJobStore.cs
-│   │   │   ├── IJobHistoryStore.cs
-│   │   │   ├── ICronScheduleStore.cs
-│   │   │   ├── IIntervalScheduleStore.cs
-│   │   │   ├── IWorkerStore.cs
-│   │   │   ├── ICoordinatorNodeStore.cs
-│   │   │   └── ILogStore.cs
-│   │   │
 │   │   └── Orchestrix.Coordinator/
-│   │       ├── LeaderElection/
-│   │       │   ├── ILeaderElection.cs
-│   │       │   ├── LeaderElection.cs
-│   │       │   └── LeaderElectionOptions.cs
-│   │       ├── Coordination/
-│   │       │   ├── ICoordinatorCoordinator.cs
-│   │       │   ├── CoordinatorCoordinator.cs
-│   │       │   └── CoordinatorCoordinatorOptions.cs
-│   │       ├── Scheduling/
-│   │       │   ├── IScheduler.cs
-│   │       │   ├── CronExpressionParser.cs
-│   │       │   ├── ScheduleEvaluator.cs
-│   │       │   ├── ScheduleScanner.cs
-│   │       │   └── JobPlanner.cs
-│   │       ├── Dispatching/
-│   │       │   ├── IJobDispatcher.cs
-│   │       │   └── JobDispatcher.cs
-│   │       ├── RateLimiting/
-│   │       │   ├── IRateLimiter.cs
-│   │       │   ├── RateLimitOptions.cs
-│   │       │   └── SlidingWindowRateLimiter.cs
-│   │       ├── Handlers/
-│   │       │   ├── JobEnqueueHandler.cs
-│   │       │   ├── WorkerHeartbeatHandler.cs
-│   │       │   └── JobTimeoutMonitor.cs
-│   │       ├── Ownership/
-│   │       │   ├── IJobOwnershipRegistry.cs
-│   │       │   ├── JobOwnershipRegistry.cs
-│   │       │   ├── JobAssignedMessage.cs
-│   │       │   ├── JobAssignmentPublisher.cs
-│   │       │   ├── JobAssignmentSubscriber.cs
-│   │       │   ├── JobEventProcessor.cs
-│   │       │   └── JobOwnershipCleanup.cs
-│   │       ├── Clustering/
-│   │       │   ├── CoordinatorNodeInfo.cs
-│   │       │   ├── ICoordinatorNodeRegistry.cs
-│   │       │   ├── CoordinatorNodeRegistry.cs
-│   │       │   ├── CoordinatorHeartbeatService.cs
-│   │       │   ├── CoordinatorHealthMonitor.cs
-│   │       │   ├── CoordinatorDrainService.cs
-│   │       │   ├── JobHandoffMessage.cs
-│   │       │   ├── JobHandoffAckMessage.cs
-│   │       │   ├── JobHandoffPublisher.cs
-│   │       │   ├── JobHandoffSubscriber.cs
-│   │       │   ├── JobHandoffAckListener.cs
-│   │       │   ├── IJobOwnershipStore.cs
-│   │       │   ├── RedisJobOwnershipStore.cs
-│   │       │   └── OrphanJobDetector.cs
-│   │       ├── CoordinatorService.cs
-│   │       ├── ICoordinatorService.cs
-│   │       ├── CoordinatorOptions.cs
-│   │       ├── CoordinatorClusterOptions.cs
-│   │       └── ServiceCollectionExtensions.cs
 │   │
-│   ├── Worker/
+│   ├── Worker/                                      # Phase 5
 │   │   └── Orchestrix.Worker/
-│   │       ├── WorkerService.cs
-│   │       ├── IWorkerService.cs
-│   │       ├── WorkerOptions.cs
-│   │       ├── WorkerInfo.cs
-│   │       ├── WorkerState.cs
-│   │       ├── Execution/
-│   │       │   ├── IJobExecutor.cs
-│   │       │   ├── JobExecutor.cs
-│   │       │   └── JobContext.cs
-│   │       ├── Registry/
-│   │       │   ├── IJobHandlerRegistry.cs
-│   │       │   └── JobHandlerRegistry.cs
-│   │       ├── Consumer/
-│   │       │   └── JobConsumer.cs
-│   │       ├── Heartbeat/
-│   │       │   └── HeartbeatService.cs
-│   │       ├── Lifecycle/
-│   │       │   ├── GracefulShutdownOptions.cs
-│   │       │   └── WorkerDrainService.cs
-│   │       ├── Cancellation/
-│   │       │   └── CancellationHandler.cs
-│   │       └── ServiceCollectionExtensions.cs
 │   │
-│   ├── Persistence/
+│   ├── Persistence/                                 # Phase 6
 │   │   ├── Orchestrix.Persistence.InMemory/
-│   │   │   ├── InMemoryJobStore.cs
-│   │   │   ├── InMemoryJobHistoryStore.cs
-│   │   │   ├── InMemoryCronScheduleStore.cs
-│   │   │   ├── InMemoryIntervalScheduleStore.cs
-│   │   │   ├── InMemoryWorkerStore.cs
-│   │   │   ├── InMemoryCoordinatorNodeStore.cs
-│   │   │   ├── InMemoryLogStore.cs
-│   │   │   └── ServiceCollectionExtensions.cs
-│   │   │
 │   │   └── Orchestrix.Persistence.EfCore/
-│   │       ├── OrchestrixDbContext.cs
-│   │       ├── Configurations/
-│   │       │   └── ...EntityConfiguration.cs
-│   │       ├── EfCoreJobStore.cs
-│   │       ├── EfCoreJobHistoryStore.cs
-│   │       ├── ... (other stores)
-│   │       └── ServiceCollectionExtensions.cs
 │   │
-│   ├── ControlPanel/
-│   │   └── Orchestrix.ControlPanel/           # Phase 7
-│   │       ├── IControlPanelService.cs
-│   │       ├── ControlPanelService.cs
-│   │       ├── ControlPanelOptions.cs
-│   │       ├── Models/
-│   │       │   ├── EnqueueOptions.cs
-│   │       │   ├── JobQueryOptions.cs
-│   │       │   ├── ScheduleQueryOptions.cs
-│   │       │   ├── PaginatedResult.cs
-│   │       │   ├── ClusterStatus.cs
-│   │       │   └── WorkerInfo.cs
-│   │       └── ServiceCollectionExtensions.cs
+│   ├── ControlPanel/                                # Phase 7
+│   │   └── Orchestrix.ControlPanel/
 │   │
 │   ├── Api/
-│   │   ├── Orchestrix.ServiceApi/             # Phase 8
-│   │   │   ├── Controllers/
-│   │   │   │   ├── JobsController.cs
-│   │   │   │   └── SchedulesController.cs
-│   │   │   ├── DTOs/
-│   │   │   │   ├── EnqueueRequest.cs
-│   │   │   │   └── EnqueueResult.cs
-│   │   │   ├── ServiceCollectionExtensions.cs
-│   │   │   └── EndpointRouteBuilderExtensions.cs
-│   │   │
-│   │   └── Orchestrix.Admin/                  # Phase 10
-│   │       ├── Controllers/
-│   │       │   ├── AdminJobsController.cs
-│   │       │   ├── AdminSchedulesController.cs
-│   │       │   ├── AdminWorkersController.cs
-│   │       │   └── AdminClusterController.cs
-│   │       ├── Hubs/
-│   │       │   ├── AdminHub.cs
-│   │       │   ├── IAdminNotifier.cs
-│   │       │   └── SignalRAdminNotifier.cs
-│   │       ├── ServiceCollectionExtensions.cs
-│   │       └── EndpointRouteBuilderExtensions.cs
+│   │   ├── Orchestrix.ServiceApi/                   # Phase 8
+│   │   └── Orchestrix.Admin/                        # Phase 10
 │   │
-│   └── Client/
-│       └── Orchestrix.Client/                 # Phase 9
-│           ├── IOrchestrixClient.cs
-│           ├── OrchestrixClient.cs
-│           ├── OrchestrixClientOptions.cs
-│           └── ServiceCollectionExtensions.cs
+│   ├── Client/                                      # Phase 9
+│   │   └── Orchestrix.Client/
+│   │
+│   └── Server/                                      # Phase 13
+│       ├── Orchestrix.Server/
+│       └── Orchestrix.Dashboard/
 │
-├── samples/
+├── samples/                                         # Phase 12
 │   ├── Orchestrix.Sample.Jobs/
 │   ├── Orchestrix.Sample.Coordinator/
 │   ├── Orchestrix.Sample.Worker/
 │   └── Orchestrix.Sample.Api/
 │
-└── tests/
+└── tests/                                           # Phase 11
     ├── Orchestrix.Tests.Unit/
-    │   └── ...
     └── Orchestrix.Tests.Integration/
-        └── ...
 ```
+```
+
+> **Note**: This shows the high-level project structure only.
+> 
+> **For detailed file structures**, see individual phase documentation:
+> - Phase 1: [`tasks/phase-1-abstractions.md`](./tasks/phase-1-abstractions.md)
+> - Phase 2: [`tasks/phase-2-transport.md`](./tasks/phase-2-transport.md)
+> - Phase 3: [`tasks/phase-3-locking.md`](./tasks/phase-3-locking.md)
+> - And so on...
+>
+> **Namespace Convention**: All projects follow folder-based namespace structure:
+> - Each `.csproj` has `<RootNamespace/>` (empty)
+> - Code organized in root folder matching project's base namespace
+> - Example: `Orchestrix.Transport.Redis` → `Orchestrix/Transport/Redis/` → `namespace Orchestrix.Transport.Redis;`
 

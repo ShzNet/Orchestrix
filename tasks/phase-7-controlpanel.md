@@ -10,6 +10,32 @@
 
 ---
 
+## Folder Structure
+
+```
+src/ControlPanel/Orchestrix.ControlPanel/
+├── Orchestrix.ControlPanel.csproj
+└── Orchestrix/
+    └── ControlPanel/
+        ├── IControlPanelService.cs
+        ├── ControlPanelService.cs
+        ├── ControlPanelOptions.cs
+        ├── ServiceCollectionExtensions.cs
+        └── Models/
+            ├── EnqueueOptions.cs
+            ├── JobQueryOptions.cs
+            ├── ScheduleQueryOptions.cs
+            ├── PaginatedResult.cs
+            ├── ClusterStatus.cs
+            └── WorkerInfo.cs
+```
+
+**Namespaces:**
+- `Orchestrix.ControlPanel` - Core control panel services
+- `Orchestrix.ControlPanel.Models` - DTOs and models
+
+---
+
 ## Concept
 
 ```

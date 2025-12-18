@@ -11,7 +11,50 @@
 
 ---
 
-## 3.1 Locking.Abstractions
+## Folder Structure
+
+### Locking.Abstractions
+```
+src/Locking/Orchestrix.Locking.Abstractions/
+├── Orchestrix.Locking.Abstractions.csproj
+└── Orchestrix/
+    └── Locking/
+        ├── IDistributedLock.cs
+        ├── IDistributedLockProvider.cs
+        └── DistributedLockOptions.cs
+```
+
+### Locking.InMemory
+```
+src/Locking/Orchestrix.Locking.InMemory/
+├── Orchestrix.Locking.InMemory.csproj
+└── Orchestrix/
+    └── Locking/
+        └── InMemory/
+            ├── InMemoryLock.cs
+            ├── InMemoryLockProvider.cs
+            └── ServiceCollectionExtensions.cs
+```
+
+### Locking.Redis
+```
+src/Locking/Orchestrix.Locking.Redis/
+├── Orchestrix.Locking.Redis.csproj
+└── Orchestrix/
+    └── Locking/
+        └── Redis/
+            ├── RedisLock.cs
+            ├── RedisLockProvider.cs
+            ├── RedisLockOptions.cs
+            └── ServiceCollectionExtensions.cs
+```
+
+**Namespaces:**
+- `Orchestrix.Locking` - Core abstractions
+- `Orchestrix.Locking.InMemory` - In-memory implementation
+- `Orchestrix.Locking.Redis` - Redis implementation
+
+---
 
 - [ ] `IDistributedLock.cs`
   ```csharp

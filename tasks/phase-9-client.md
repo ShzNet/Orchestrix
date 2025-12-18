@@ -10,6 +10,24 @@
 
 ---
 
+## Folder Structure
+
+```
+src/Client/Orchestrix.Client/
+├── Orchestrix.Client.csproj
+└── Orchestrix/
+    └── Client/
+        ├── IOrchestrixClient.cs
+        ├── OrchestrixClient.cs
+        ├── OrchestrixClientOptions.cs
+        └── ServiceCollectionExtensions.cs
+```
+
+**Namespaces:**
+- `Orchestrix.Client` - Client SDK
+
+---
+
 ## Concept
 
 ```

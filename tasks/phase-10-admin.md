@@ -10,6 +10,32 @@
 
 ---
 
+## Folder Structure
+
+```
+src/Api/Orchestrix.Admin/
+├── Orchestrix.Admin.csproj
+└── Orchestrix/
+    └── Admin/
+        ├── Controllers/
+        │   ├── AdminJobsController.cs
+        │   ├── AdminSchedulesController.cs
+        │   ├── AdminWorkersController.cs
+        │   └── AdminClusterController.cs
+        ├── Hubs/
+        │   ├── AdminHub.cs
+        │   ├── IAdminNotifier.cs
+        │   └── SignalRAdminNotifier.cs
+        ├── ServiceCollectionExtensions.cs
+        └── EndpointRouteBuilderExtensions.cs
+```
+
+**Namespaces:**
+- `Orchestrix.Admin.Controllers` - Admin API controllers
+- `Orchestrix.Admin.Hubs` - SignalR hubs for real-time updates
+
+---
+
 ## Concept
 
 ```

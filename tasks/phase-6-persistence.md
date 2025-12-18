@@ -10,6 +10,61 @@
 
 ---
 
+## Folder Structure
+
+### Persistence.InMemory
+```
+src/Persistence/Orchestrix.Persistence.InMemory/
+├── Orchestrix.Persistence.InMemory.csproj
+└── Orchestrix/
+    └── Persistence/
+        └── InMemory/
+            ├── InMemoryJobStore.cs
+            ├── InMemoryJobHistoryStore.cs
+            ├── InMemoryCronScheduleStore.cs
+            ├── InMemoryIntervalScheduleStore.cs
+            ├── InMemoryWorkerStore.cs
+            ├── InMemoryCoordinatorNodeStore.cs
+            ├── InMemoryLogStore.cs
+            ├── InMemoryDeadLetterStore.cs
+            └── ServiceCollectionExtensions.cs
+```
+
+### Persistence.EfCore
+```
+src/Persistence/Orchestrix.Persistence.EfCore/
+├── Orchestrix.Persistence.EfCore.csproj
+└── Orchestrix/
+    └── Persistence/
+        └── EfCore/
+            ├── OrchestrixDbContext.cs
+            ├── Configurations/
+            │   ├── JobEntityConfiguration.cs
+            │   ├── JobHistoryEntityConfiguration.cs
+            │   ├── CronScheduleEntityConfiguration.cs
+            │   ├── IntervalScheduleEntityConfiguration.cs
+            │   ├── WorkerEntityConfiguration.cs
+            │   ├── CoordinatorNodeEntityConfiguration.cs
+            │   ├── LogEntryConfiguration.cs
+            │   └── DeadLetterEntityConfiguration.cs
+            ├── EfCoreJobStore.cs
+            ├── EfCoreJobHistoryStore.cs
+            ├── EfCoreCronScheduleStore.cs
+            ├── EfCoreIntervalScheduleStore.cs
+            ├── EfCoreWorkerStore.cs
+            ├── EfCoreCoordinatorNodeStore.cs
+            ├── EfCoreLogStore.cs
+            ├── EfCoreDeadLetterStore.cs
+            └── ServiceCollectionExtensions.cs
+```
+
+**Namespaces:**
+- `Orchestrix.Persistence.InMemory` - In-memory stores
+- `Orchestrix.Persistence.EfCore` - EF Core implementation
+- `Orchestrix.Persistence.EfCore.Configurations` - Entity configurations
+
+---
+
 ## 6.1 Persistence.InMemory
 
 > For testing and development only.

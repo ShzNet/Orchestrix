@@ -1,5 +1,7 @@
 <Solution>
-  <Folder Name="/src/" />
+  <Folder Name="/src/">
+    <Project Path="src/Orchestrix.Abstractions/Orchestrix.Abstractions.csproj" />
+  </Folder>
   <Folder Name="/docs/" />
   <Folder Name="/tests/" />
 </Solution>

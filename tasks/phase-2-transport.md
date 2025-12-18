@@ -12,6 +12,63 @@
 
 ---
 
+## Folder Structure
+
+### Transport.Abstractions
+```
+src/Transport/Orchestrix.Transport.Abstractions/
+├── Orchestrix.Transport.Abstractions.csproj
+└── Orchestrix/
+    └── Transport/
+        ├── ITransport.cs
+        ├── IPublisher.cs
+        ├── ISubscriber.cs
+        ├── SubscriptionOptions.cs
+        ├── IMessageSerializer.cs
+        ├── JsonMessageSerializer.cs
+        ├── MessageEnvelope.cs
+        ├── TransportChannels.cs
+        └── Messages/
+            ├── JobEnqueueMessage.cs
+            ├── JobAssignedMessage.cs
+            ├── JobDispatchMessage.cs
+            ├── JobCancelMessage.cs
+            ├── JobStatusMessage.cs
+            ├── JobLogMessage.cs
+            ├── JobResultMessage.cs
+            ├── JobHandoffMessage.cs
+            ├── JobHandoffAckMessage.cs
+            ├── WorkerHeartbeatMessage.cs
+            ├── WorkerRegistrationMessage.cs
+            └── CoordinatorHeartbeatMessage.cs
+```
+
+### Transport.Redis
+```
+src/Transport/Orchestrix.Transport.Redis/
+├── Orchestrix.Transport.Redis.csproj
+└── Orchestrix/
+    └── Transport/
+        └── Redis/
+            ├── RedisTransport.cs
+            ├── RedisPublisher.cs
+            ├── RedisSubscriber.cs
+            ├── RedisTransportOptions.cs
+            └── ServiceCollectionExtensions.cs
+```
+
+### Transport.RabbitMQ & Kafka
+Similar structure: `Orchestrix/Transport/RabbitMQ/` and `Orchestrix/Transport/Kafka/`
+
+**Namespaces:**
+- `Orchestrix.Transport` - Core abstractions
+- `Orchestrix.Transport.Messages` - Message types
+- `Orchestrix.Transport.Redis` - Redis implementation
+- `Orchestrix.Transport.RabbitMQ` - RabbitMQ implementation
+- `Orchestrix.Transport.Kafka` - Kafka implementation
+
+---
+
 ## 2.1 Transport.Abstractions
 
 ### Interfaces

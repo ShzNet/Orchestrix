@@ -11,6 +11,53 @@
 
 ---
 
+## Folder Structure
+
+### Server (ASP.NET Core)
+```
+src/Server/Orchestrix.Server/
+├── Orchestrix.Server.csproj
+├── Program.cs
+├── appsettings.json
+├── appsettings.Development.json
+├── Dockerfile
+└── Orchestrix/
+    └── Server/
+        ├── EndpointRouteBuilderExtensions.cs
+        ├── ServiceCollectionExtensions.cs
+        └── DashboardOptions.cs
+```
+
+### Dashboard (React)
+```
+src/Server/Orchestrix.Dashboard/
+├── package.json
+├── vite.config.ts
+├── tsconfig.json
+├── index.html
+├── src/
+│   ├── main.tsx
+│   ├── App.tsx
+│   ├── components/
+│   │   ├── ui/              (shadcn/ui components)
+│   │   ├── JobList.tsx
+│   │   ├── JobDetails.tsx
+│   │   ├── WorkerList.tsx
+│   │   └── ClusterStatus.tsx
+│   ├── hooks/
+│   │   └── useSignalR.ts
+│   ├── api/
+│   │   └── client.ts
+│   └── lib/
+│       └── utils.ts
+└── public/
+```
+
+**Namespaces:**
+- `Orchestrix.Server` - Server application
+
+---
+
 ## Concept
 
 ```

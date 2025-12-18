@@ -14,6 +14,126 @@
 
 ---
 
+## Folder Structure
+
+### Coordinator.Abstractions
+```
+src/Coordinator/Orchestrix.Coordinator.Abstractions/
+├── Orchestrix.Coordinator.Abstractions.csproj
+└── Orchestrix/
+    └── Coordinator/
+        ├── CoordinatorOptions.cs
+        └── ICoordinatorBuilder.cs
+```
+
+### Coordinator.Persistence.Abstractions
+```
+src/Coordinator/Orchestrix.Coordinator.Persistence.Abstractions/
+├── Orchestrix.Coordinator.Persistence.Abstractions.csproj
+└── Orchestrix/
+    └── Coordinator/
+        └── Persistence/
+            ├── Entities/
+            │   ├── JobEntity.cs
+            │   ├── JobHistoryEntity.cs
+            │   ├── CronScheduleEntity.cs
+            │   ├── IntervalScheduleEntity.cs
+            │   ├── WorkerEntity.cs
+            │   ├── CoordinatorNodeEntity.cs
+            │   ├── LogEntry.cs
+            │   └── DeadLetterEntity.cs
+            ├── IJobStore.cs
+            ├── IJobHistoryStore.cs
+            ├── ICronScheduleStore.cs
+            ├── IIntervalScheduleStore.cs
+            ├── IWorkerStore.cs
+            ├── ICoordinatorNodeStore.cs
+            ├── ILogStore.cs
+            └── IDeadLetterStore.cs
+```
+
+### Coordinator (Main Implementation)
+```
+src/Coordinator/Orchestrix.Coordinator/
+├── Orchestrix.Coordinator.csproj
+└── Orchestrix/
+    └── Coordinator/
+        ├── CoordinatorBuilder.cs
+        ├── CoordinatorClusterOptions.cs
+        ├── ICoordinatorService.cs
+        ├── CoordinatorService.cs
+        ├── ServiceCollectionExtensions.cs
+        ├── Caching/
+        │   ├── CacheKeys.cs
+        │   ├── CacheOptions.cs
+        │   ├── ICacheService.cs
+        │   └── CacheService.cs
+        ├── LeaderElection/
+        │   ├── ILeaderElection.cs
+        │   ├── LeaderElection.cs
+        │   └── LeaderElectionOptions.cs
+        ├── Coordination/
+        │   ├── ICoordinatorCoordinator.cs
+        │   ├── CoordinatorCoordinator.cs
+        │   └── CoordinatorCoordinatorOptions.cs
+        ├── Scheduling/
+        │   ├── IScheduler.cs
+        │   ├── CronExpressionParser.cs
+        │   ├── ScheduleEvaluator.cs
+        │   ├── ScheduleScanner.cs
+        │   └── JobPlanner.cs
+        ├── Dispatching/
+        │   ├── IJobDispatcher.cs
+        │   └── JobDispatcher.cs
+        ├── RateLimiting/
+        │   ├── IRateLimiter.cs
+        │   ├── RateLimitOptions.cs
+        │   └── SlidingWindowRateLimiter.cs
+        ├── Handlers/
+        │   ├── JobEnqueueHandler.cs
+        │   ├── WorkerHeartbeatHandler.cs
+        │   └── JobTimeoutMonitor.cs
+        ├── Ownership/
+        │   ├── IJobOwnershipRegistry.cs
+        │   ├── JobOwnershipRegistry.cs
+        │   ├── JobLoadInfo.cs
+        │   ├── JobAssignmentPublisher.cs
+        │   ├── JobAssignmentSubscriber.cs
+        │   ├── JobEventProcessor.cs
+        │   ├── JobOwnershipCleanup.cs
+        │   └── JobLoadBalancer.cs
+        ├── Clustering/
+        │   ├── CoordinatorNodeInfo.cs
+        │   ├── ICoordinatorNodeRegistry.cs
+        │   ├── CoordinatorNodeRegistry.cs
+        │   ├── CoordinatorHeartbeatService.cs
+        │   ├── CoordinatorHealthMonitor.cs
+        │   ├── CoordinatorDrainService.cs
+        │   ├── JobHandoffPublisher.cs
+        │   ├── JobHandoffSubscriber.cs
+        │   ├── JobHandoffAckListener.cs
+        │   └── OrphanJobDetector.cs
+        └── ChannelCleanup/
+            ├── ChannelCleanupScanner.cs
+            └── ChannelCleanupOptions.cs
+```
+
+**Namespaces:**
+- `Orchestrix.Coordinator` - Core coordinator abstractions and services
+- `Orchestrix.Coordinator.Persistence` - Persistence abstractions (entities & stores)
+- `Orchestrix.Coordinator.Caching` - Caching services
+- `Orchestrix.Coordinator.LeaderElection` - Leader election logic
+- `Orchestrix.Coordinator.Coordination` - Coordinator-to-coordinator communication
+- `Orchestrix.Coordinator.Scheduling` - Job scheduling
+- `Orchestrix.Coordinator.Dispatching` - Job dispatching
+- `Orchestrix.Coordinator.RateLimiting` - Rate limiting
+- `Orchestrix.Coordinator.Handlers` - Event handlers
+- `Orchestrix.Coordinator.Ownership` - Job ownership & follower coordination
+- `Orchestrix.Coordinator.Clustering` - Cluster management & scale down
+- `Orchestrix.Coordinator.ChannelCleanup` - Channel cleanup logic
+
+---
+
 ## 4.0 Coordinator.Abstractions
 
 > Options and Builder interface only. No registration logic here.

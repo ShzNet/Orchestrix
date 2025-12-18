@@ -9,6 +9,28 @@
 
 ---
 
+## Folder Structure
+
+```
+tests/Orchestrix.Tests.Integration/
+├── Orchestrix.Tests.Integration.csproj
+└── Orchestrix/
+    └── Tests/
+        └── Integration/
+            ├── JobLifecycleTests.cs
+            ├── SchedulingTests.cs
+            ├── WorkerScaleTests.cs
+            ├── CoordinatorClusterTests.cs
+            ├── GracefulShutdownTests.cs
+            └── Fixtures/
+                └── OrchestrixTestFixture.cs
+```
+
+**Namespaces:**
+- `Orchestrix.Tests.Integration` - Integration and E2E tests
+
+---
+
 ## 11.1 Integration Tests
 
 ### End-to-End Flow

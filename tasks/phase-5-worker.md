@@ -9,6 +9,48 @@
 
 ---
 
+## Folder Structure
+
+```
+src/Worker/Orchestrix.Worker/
+├── Orchestrix.Worker.csproj
+└── Orchestrix/
+    └── Worker/
+        ├── WorkerService.cs
+        ├── IWorkerService.cs
+        ├── WorkerOptions.cs
+        ├── WorkerInfo.cs
+        ├── WorkerState.cs
+        ├── ServiceCollectionExtensions.cs
+        ├── Execution/
+        │   ├── IJobExecutor.cs
+        │   ├── JobExecutor.cs
+        │   └── JobContext.cs
+        ├── Registry/
+        │   ├── IJobHandlerRegistry.cs
+        │   └── JobHandlerRegistry.cs
+        ├── Consumer/
+        │   └── JobConsumer.cs
+        ├── Heartbeat/
+        │   └── HeartbeatService.cs
+        ├── Lifecycle/
+        │   ├── GracefulShutdownOptions.cs
+        │   └── WorkerDrainService.cs
+        └── Cancellation/
+            └── CancellationHandler.cs
+```
+
+**Namespaces:**
+- `Orchestrix.Worker` - Core worker services
+- `Orchestrix.Worker.Execution` - Job execution logic
+- `Orchestrix.Worker.Registry` - Job handler registry
+- `Orchestrix.Worker.Consumer` - Job consumer
+- `Orchestrix.Worker.Heartbeat` - Heartbeat service
+- `Orchestrix.Worker.Lifecycle` - Graceful shutdown
+- `Orchestrix.Worker.Cancellation` - Job cancellation
+
+---
+
 ## 5.1 Core
 
 - [ ] `WorkerOptions.cs`

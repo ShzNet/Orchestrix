@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace/>
+    <AssemblyName>Orchestrix.Abstractions</AssemblyName>
+    <Description>Core abstractions for Orchestrix distributed job orchestration framework</Description>
+    <PackageTags>orchestrix;jobs;background;distributed;abstractions</PackageTags>
+  </PropertyGroup>
+
+</Project>

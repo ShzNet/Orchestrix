@@ -12,6 +12,40 @@
 
 ---
 
+## Folder Structure
+
+```
+samples/
+├── Orchestrix.Sample.Jobs/
+│   ├── Orchestrix.Sample.Jobs.csproj
+│   └── Orchestrix/
+│       └── Sample/
+│           └── Jobs/
+│               ├── EmailJobHandler.cs
+│               ├── ReportJobHandler.cs
+│               └── DataProcessingJobHandler.cs
+│
+├── Orchestrix.Sample.Coordinator/
+│   ├── Orchestrix.Sample.Coordinator.csproj
+│   ├── Program.cs
+│   └── appsettings.json
+│
+├── Orchestrix.Sample.Worker/
+│   ├── Orchestrix.Sample.Worker.csproj
+│   ├── Program.cs
+│   └── appsettings.json
+│
+└── Orchestrix.Sample.Api/
+    ├── Orchestrix.Sample.Api.csproj
+    ├── Program.cs
+    └── appsettings.json
+```
+
+**Namespaces:**
+- `Orchestrix.Sample.Jobs` - Sample job handlers
+
+---
+
 ## 12.1 Sample Jobs
 
 - [ ] `SendEmailJob.cs`
