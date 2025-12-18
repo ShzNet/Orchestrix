@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    
+    <!-- Package Info -->
+    <Authors>Shizaki</Authors>
+    <Company>Shizaki</Company>
+    <Copyright>Copyright © Shizaki 2025</Copyright>
+    <RepositoryType>git</RepositoryType>
+    
+    <!-- Build settings -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+</Project>
