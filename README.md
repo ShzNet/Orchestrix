@@ -48,7 +48,7 @@ Orchestrix is a **distributed background job processing framework** that provide
 │    └───────┼─────────────┼─────────────┼──────────────────┘                 │
 │            │             │             │                                    │
 │            └─────────────┼─────────────┘                                    │
-│                          │ Transport (Redis/RabbitMQ/Kafka)                │
+│                          │ Transport (Redis/RabbitMQ/Kafka)                 │
 │                   ┌──────▼──────┐                                           │
 │           ┌───────┴───────┬─────┴────────┐                                  │
 │           │               │              │                                  │

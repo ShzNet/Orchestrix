@@ -175,15 +175,15 @@ app.Run();
 |  +--------------------------------------------------------------------+  |
 |                                                                          |
 |  +--------------------------------------------------------------------+  |
-|  | Job ID    | Type           | Queue   | Status    | Created    | : |  |
+|  | Job ID    | Type           | Queue   | Status    | Created    | : |   |
 |  +--------------------------------------------------------------------+  |
-|  | a1b2c3d4  | SendEmailJob   | email   | Running   | 10:30:00   | : |  |
-|  | e5f6g7h8  | ProcessVideo   | video   | Pending   | 10:28:00   | : |  |
-|  | i9j0k1l2  | GenerateReport | default | Completed | 10:25:00   | : |  |
-|  | m3n4o5p6  | SyncDataJob    | sync    | Failed    | 10:20:00   | : |  |
+|  | a1b2c3d4  | SendEmailJob   | email   | Running   | 10:30:00   | : |   |
+|  | e5f6g7h8  | ProcessVideo   | video   | Pending   | 10:28:00   | : |   |
+|  | i9j0k1l2  | GenerateReport | default | Completed | 10:25:00   | : |   |
+|  | m3n4o5p6  | SyncDataJob    | sync    | Failed    | 10:20:00   | : |   |
 |  +--------------------------------------------------------------------+  |
 |                                                                          |
-|  < 1 2 3 4 5 >                                          Showing 1-20    |
+|  < 1 2 3 4 5 >                                          Showing 1-20     |
 +--------------------------------------------------------------------------+
 ```
 

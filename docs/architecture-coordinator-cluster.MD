@@ -124,21 +124,21 @@ Global job.status/logs channels with load balancing → events fragmented across
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  1. Consumer Group distributes job.assigned messages                        │
-│     ┌──────────┐  ┌──────────┐  ┌──────────┐                               │
-│     │  Coord 1 │  │  Coord 2 │  │  Coord 3 │                               │
-│     │ (50 jobs)│  │ (48 jobs)│  │ (52 jobs)│  ← Balanced                   │
-│     └──────────┘  └──────────┘  └──────────┘                               │
+│     ┌──────────┐  ┌──────────┐  ┌──────────┐                                │
+│     │  Coord 1 │  │  Coord 2 │  │  Coord 3 │                                │
+│     │ (50 jobs)│  │ (48 jobs)│  │ (52 jobs)│  ← Balanced                    │
+│     └──────────┘  └──────────┘  └──────────┘                                │
 │                                                                             │
 │  2. Each node publishes load in heartbeat                                   │
-│     { NodeId: "coord-1", JobCount: 50, Timestamp: ... }                    │
+│     { NodeId: "coord-1", JobCount: 50, Timestamp: ... }                     │
 │                                                                             │
 │  3. If imbalance detected (threshold: 2x difference)                        │
 │     ┌──────────┐  ┌──────────┐                                              │
 │     │  Coord 1 │  │  Coord 2 │                                              │
-│     │(100 jobs)│  │ (20 jobs)│  ← Imbalanced!                              │
+│     │(100 jobs)│  │ (20 jobs)│  ← Imbalanced!                               │
 │     └────┬─────┘  └──────────┘                                              │
 │          │                                                                  │
-│          └──► Handoff 40 jobs to job.handoff channel                       │
+│          └──► Handoff 40 jobs to job.handoff channel                        │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
