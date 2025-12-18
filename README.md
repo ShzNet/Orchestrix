@@ -206,6 +206,7 @@ Orchestrix/
 | Feature | Status |
 |:--------|:-------|
 | Core Abstractions | ✅ Completed |
+| Transport Abstractions | ✅ Completed |
 | Immediate Jobs | 🔲 Planned |
 | Delayed Jobs | 🔲 Planned |
 | Cron Jobs | 🔲 Planned |

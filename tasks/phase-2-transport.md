@@ -1,5 +1,6 @@
 # Phase 2: Transport
 
+> **Status**: 🔄 **IN PROGRESS** (Phase 2.1 ✅ Complete)  
 > Message transport abstractions and implementations.
 
 ## Projects
@@ -14,65 +15,54 @@
 
 ## Folder Structure
 
-### Transport.Abstractions
+### Transport.Abstractions ✅
 ```
 src/Transport/Orchestrix.Transport.Abstractions/
 ├── Orchestrix.Transport.Abstractions.csproj
-└── Orchestrix/
-    └── Transport/
-        ├── ITransport.cs
-        ├── IPublisher.cs
-        ├── ISubscriber.cs
-        ├── SubscriptionOptions.cs
-        ├── IMessageSerializer.cs
-        ├── JsonMessageSerializer.cs
-        ├── MessageEnvelope.cs
-        ├── TransportChannels.cs
-        └── Messages/
-            ├── JobEnqueueMessage.cs
-            ├── JobAssignedMessage.cs
-            ├── JobDispatchMessage.cs
-            ├── JobCancelMessage.cs
-            ├── JobStatusMessage.cs
-            ├── JobLogMessage.cs
-            ├── JobResultMessage.cs
-            ├── JobHandoffMessage.cs
-            ├── JobHandoffAckMessage.cs
-            ├── WorkerHeartbeatMessage.cs
-            ├── WorkerRegistrationMessage.cs
-            └── CoordinatorHeartbeatMessage.cs
+├── Orchestrix/Transport/
+│   ├── ITransport.cs
+│   ├── IPublisher.cs
+│   ├── ISubscriber.cs
+│   ├── TransportOptions.cs
+│   ├── TransportChannels.cs
+│   ├── Serialization/
+│   │   ├── IMessageSerializer.cs
+│   │   ├── JsonMessageSerializer.cs
+│   │   └── MessageEnvelope.cs
+│   └── Messages/
+│       ├── Jobs/
+│       │   ├── JobDispatchMessage.cs
+│       │   ├── JobCancelMessage.cs
+│       │   ├── JobStatusMessage.cs
+│       │   └── JobLogMessage.cs
+│       └── Workers/
+│           ├── WorkerJoinMessage.cs
+│           ├── WorkerShutdownMessage.cs
+│           └── WorkerMetricsMessage.cs
 ```
 
-### Transport.Redis
-```
-src/Transport/Orchestrix.Transport.Redis/
-├── Orchestrix.Transport.Redis.csproj
-└── Orchestrix/
-    └── Transport/
-        └── Redis/
-            ├── RedisTransport.cs
-            ├── RedisPublisher.cs
-            ├── RedisSubscriber.cs
-            ├── RedisTransportOptions.cs
-            └── ServiceCollectionExtensions.cs
-```
+**Files: 15 total**
+- Core: 5 (ITransport, IPublisher, ISubscriber, TransportOptions, TransportChannels)
+- Serialization: 3 (IMessageSerializer, JsonMessageSerializer, MessageEnvelope)
+- Messages: 7 (4 Jobs + 3 Workers)
 
-### Transport.RabbitMQ & Kafka
-Similar structure: `Orchestrix/Transport/RabbitMQ/` and `Orchestrix/Transport/Kafka/`
+**Channels: 7 total**
+- Coordinator → Worker: `JobDispatch(queue)`, `JobCancel`
+- Worker → Coordinator: `JobStatus(executionId)`, `JobLog(executionId)`, `WorkerJoin`, `WorkerShutdown(workerId)`, `WorkerMetrics(workerId)`
 
-**Namespaces:**
-- `Orchestrix.Transport` - Core abstractions
-- `Orchestrix.Transport.Messages` - Message types
-- `Orchestrix.Transport.Redis` - Redis implementation
-- `Orchestrix.Transport.RabbitMQ` - RabbitMQ implementation
-- `Orchestrix.Transport.Kafka` - Kafka implementation
+**Key Features:**
+- ✅ No polyfills (all classes)
+- ✅ IServiceCollection support for DI
+- ✅ Dynamic routing: ID-first pattern (`{prefix}:job:{id}:action`)
+- ✅ Auto-unsubscribe: Handler returns `bool`
+- ✅ Nested configuration: `services.AddCoordinator(opt => opt.Transport.UseRedis(...))`
 
 ---
 
-## 2.1 Transport.Abstractions
+## 2.1 Transport.Abstractions ✅
 
 ### Interfaces
-- [ ] `ITransport.cs`
+- [x] `ITransport.cs`
   ```csharp
   public interface ITransport
   {
@@ -81,7 +71,7 @@ Similar structure: `Orchestrix/Transport/RabbitMQ/` and `Orchestrix/Transport/Ka
   }
   ```
 
-- [ ] `IPublisher.cs`
+- [x] `IPublisher.cs`
   ```csharp
   public interface IPublisher
   {
@@ -89,53 +79,26 @@ Similar structure: `Orchestrix/Transport/RabbitMQ/` and `Orchestrix/Transport/Ka
   }
   ```
 
-- [ ] `ISubscriber.cs`
+- [x] `ISubscriber.cs` - Simplified with auto-unsubscribe
   ```csharp
   public interface ISubscriber
   {
-      // Broadcast/Topic - all subscribers receive message
+      // Handler returns true to continue, false to auto-unsubscribe
       Task SubscribeAsync<T>(
           string channel, 
-          Func<T, Task> handler, 
-          CancellationToken ct = default);
-      
-      // Competing Consumers - only one subscriber receives message
-      Task SubscribeCompetingAsync<T>(
-          string channel,
-          string consumerGroup,
-          string consumerName,
-          Func<T, Task> handler,
-          CancellationToken ct = default);
-      
-      // Competing Consumers with options (AutoAck, PrefetchCount, ClaimTimeout)
-      Task SubscribeCompetingAsync<T>(
-          string channel,
-          string consumerGroup,
-          string consumerName,
-          Func<T, Task> handler,
-          SubscriptionOptions options,
+          Func<T, Task<bool>> handler, 
           CancellationToken ct = default);
       
       Task UnsubscribeAsync(string channel);
-      
-      // Close channel and cleanup resources (Redis: XTRIM/DELETE, InMemory: remove)
       Task CloseChannelAsync(string channel, CancellationToken ct = default);
   }
   ```
 
 ### Models
-- [ ] `SubscriptionOptions.cs`
-  ```csharp
-  public record SubscriptionOptions
-  {
-      public bool AutoAck { get; init; } = true;
-      public int PrefetchCount { get; init; } = 1;
-      public TimeSpan? ClaimTimeout { get; init; }  // For pending message recovery
-  }
-  ```
+- [x] ~~`SubscriptionOptions.cs`~~ - Removed (not needed in abstractions)
 
 ### Serialization
-- [ ] `IMessageSerializer.cs`
+- [x] `IMessageSerializer.cs`
   ```csharp
   public interface IMessageSerializer
   {
@@ -145,70 +108,65 @@ Similar structure: `Orchestrix/Transport/RabbitMQ/` and `Orchestrix/Transport/Ka
   }
   ```
 
-- [ ] `JsonMessageSerializer.cs` - Default implementation using System.Text.Json
+- [x] `JsonMessageSerializer.cs` - Default implementation using System.Text.Json 10.0.1
   ```csharp
   public class JsonMessageSerializer : IMessageSerializer { ... }
   ```
 
-- [ ] `MessageEnvelope.cs`
+- [x] `MessageEnvelope.cs`
   ```csharp
-  public record MessageEnvelope<T>
+  public record MessageEnvelope
   {
-      public required T Payload { get; init; }
-      public required string MessageId { get; init; }
+      public required Guid MessageId { get; init; }
       public required DateTimeOffset Timestamp { get; init; }
-      public string? CorrelationId { get; init; }
+      public required string MessageType { get; init; }
+      public required byte[] Payload { get; init; }
   }
   ```
 
 ### Messages
-> Message types for communication between ControlPanel ↔ Coordinator ↔ Worker
+> Message types for Worker ↔ Coordinator communication
 
-#### Job Messages
-- [ ] `JobEnqueueMessage.cs` - ControlPanel → Coordinator: request to enqueue job
-- [ ] `JobAssignedMessage.cs` - Coordinator → Follower: job assigned to follower node
-- [ ] `JobDispatchMessage.cs` - Coordinator → Worker: dispatch job for execution
-- [ ] `JobCancelMessage.cs` - ControlPanel/Coordinator → Worker: request to cancel job
-- [ ] `JobStatusMessage.cs` - Worker → Coordinator/ControlPanel: job status update
-- [ ] `JobLogMessage.cs` - Worker → ControlPanel: realtime log streaming
-- [ ] `JobResultMessage.cs` - Worker → Coordinator: execution result (success/fail)
-- [ ] `JobHandoffMessage.cs` - Coordinator → Coordinator: handoff jobs during scale down
-- [ ] `JobHandoffAckMessage.cs` - Coordinator → Coordinator: acknowledge handoff received
+#### Job Messages (in `Messages/Jobs/`)
+- [x] ~~`JobEnqueueMessage.cs`~~ - Removed (Service API only)
+- [x] ~~`JobAssignedMessage.cs`~~ - Removed (Coordinator internal)
+- [x] `JobDispatchMessage.cs` - Coordinator → Worker: dispatch job for execution
+- [x] `JobCancelMessage.cs` - Coordinator → Worker: request to cancel job
+- [x] `JobStatusMessage.cs` - Worker → Coordinator: job status update
+- [x] `JobLogMessage.cs` - Worker → Coordinator: realtime log streaming
+- [x] `JobResultMessage.cs` - Worker → Coordinator: execution result (success/fail)
+- [x] ~~`JobHandoffMessage.cs`~~ - Removed (Coordinator internal)
+- [x] ~~`JobHandoffAckMessage.cs`~~ - Removed (Coordinator internal)
 
-#### Worker Messages
-- [ ] `WorkerHeartbeatMessage.cs` - Worker → Coordinator: heartbeat + capacity info
-- [ ] `WorkerRegistrationMessage.cs` - Worker → Coordinator: register new worker
+#### Worker Messages (in `Messages/Workers/`)
+- [x] `WorkerHeartbeatMessage.cs` - Worker → Coordinator: heartbeat + capacity info
+- [x] `WorkerRegistrationMessage.cs` - Worker → Coordinator: register new worker
 
 #### Coordinator Messages
-- [ ] `CoordinatorHeartbeatMessage.cs` - Coordinator → Cluster: heartbeat between nodes
+- [x] ~~`CoordinatorHeartbeatMessage.cs`~~ - Removed (Coordinator internal)
 
-### Static Helpers
-- [ ] `TransportChannels.cs`
+### Channels
+- [x] `TransportChannels.cs` - Dynamic channel routing with configurable prefix
   ```csharp
-  public static class TransportChannels
+  public class TransportChannels
   {
-      public static class Job
-      {
-          public static string Dispatch(string queue) => $"orchestrix.job.dispatch.{queue}";
-          public const string Cancel = "orchestrix.job.cancel";
-          public const string Assigned = "orchestrix.job.assigned";
-          public static string Status(Guid jobId) => $"orchestrix.job.{jobId}.status";
-          public static string Logs(Guid jobId) => $"orchestrix.job.{jobId}.logs";
-          public const string Handoff = "orchestrix.job.handoff";
-          public static string HandoffAck(string nodeId) => $"orchestrix.job.handoff.ack.{nodeId}";
-          public const string Enqueue = "orchestrix.job.enqueue";
-      }
+      public TransportChannels(string prefix = "orchestrix");
       
-      public static class Worker
-      {
-          public const string Heartbeat = "orchestrix.worker.heartbeat";
-          public const string Registration = "orchestrix.worker.registration";
-      }
+      // Queue-based (Coordinator → Worker)
+      public string JobDispatch(string queueName);
+      public string JobCancel { get; }
       
-      public static class Coordinator
-      {
-          public const string Heartbeat = "orchestrix.coordinator.heartbeat";
-      }
+      // Execution-based (Worker → Coordinator)
+      public string JobStatus(Guid executionId);
+      public string JobLog(Guid executionId);
+      public string JobResult(Guid executionId);
+      
+      // Static channels
+      public string WorkerHeartbeat { get; }
+      public string WorkerRegistration { get; }
+      public string WorkerMetrics { get; }
+      
+      public static TransportChannels Default { get; }
   }
   ```
 

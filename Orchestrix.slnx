@@ -3,5 +3,8 @@
     <Project Path="src/Orchestrix.Abstractions/Orchestrix.Abstractions.csproj" />
   </Folder>
   <Folder Name="/docs/" />
+  <Folder Name="/src/Transport/">
+    <Project Path="src/Transport/Orchestrix.Transport.Abstractions/Orchestrix.Transport.Abstractions.csproj" />
+  </Folder>
   <Folder Name="/tests/" />
 </Solution>

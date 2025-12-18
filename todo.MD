@@ -86,13 +86,12 @@ All projects inherit from `Directory.Build.props`:
 - [x] Schedule types (ScheduleInfo, RetryPolicy)
 - [x] Polyfills for netstandard2.1 compatibility
 
-### Phase 2: Transport
+### Phase 2: Transport 🔄
 > 📄 [`tasks/phase-2-transport.md`](./tasks/phase-2-transport.md)
-- [ ] Transport abstractions (IPublisher, ISubscriber)
-- [ ] Serialization (IMessageSerializer)
-- [ ] Redis implementation
-- [ ] RabbitMQ implementation
-- [ ] Kafka implementation
+- [x] **2.1 Transport.Abstractions** - 7 channels, 7 messages, no polyfills, DI support
+- [ ] 2.2 Transport.Redis - Redis Streams implementation
+- [ ] 2.3 Transport.RabbitMQ - RabbitMQ implementation
+- [ ] 2.4 Transport.Kafka - Kafka implementation
 - [ ] **Unit Tests**: `JsonMessageSerializerTests`
 
 ### Phase 3: Locking
