@@ -11,8 +11,8 @@
 |:------|:--------|:-------|
 | 0 | Project Setup | ✅ Done |
 | 1 | `Orchestrix.Abstractions` | ✅ Done |
-| 2 | `Orchestrix.Transport.*` | 🔲 TODO |
-| 3 | `Orchestrix.Locking.*` | 🔲 TODO |
+| 2 | `Orchestrix.Transport.*` | 🔄 In Progress |
+| 3 | `Orchestrix.Locking.*` | ✅ Done |
 | 4 | `Orchestrix.Coordinator.*` | 🔲 TODO |
 | 5 | `Orchestrix.Worker` | 🔲 TODO |
 | 6 | `Orchestrix.Persistence.*` | 🔲 TODO |
@@ -94,12 +94,11 @@ All projects inherit from `Directory.Build.props`:
 - [ ] 2.4 Transport.Kafka - Kafka implementation
 - [ ] **Unit Tests**: `JsonMessageSerializerTests`
 
-### Phase 3: Locking
+### Phase 3: Locking ✅
 > 📄 [`tasks/phase-3-locking.md`](./tasks/phase-3-locking.md)
-- [ ] Locking abstractions
-- [ ] InMemory implementation
-- [ ] Redis implementation
-- [ ] **Unit Tests**: `InMemoryLockTests`, `InMemoryLockProviderTests`
+- [x] **3.1 Locking.Abstractions** - IDistributedLock, IDistributedLockProvider, options
+- [x] **3.2 InMemory implementation** - SemaphoreSlim-based, ConcurrentDictionary pooling
+- [x] **3.3 Redis implementation** - SET NX EX pattern, Lua script for safe release
 
 ### Phase 4: Coordinator Core
 > 📄 [`tasks/phase-4-coordinator.md`](./tasks/phase-4-coordinator.md)

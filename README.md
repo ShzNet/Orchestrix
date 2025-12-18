@@ -207,6 +207,7 @@ Orchestrix/
 |:--------|:-------|
 | Core Abstractions | ✅ Completed |
 | Transport Abstractions | ✅ Completed |
+| Distributed Locking | ✅ Completed |
 | Immediate Jobs | 🔲 Planned |
 | Delayed Jobs | 🔲 Planned |
 | Cron Jobs | 🔲 Planned |

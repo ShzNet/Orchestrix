@@ -3,6 +3,11 @@
     <Project Path="src/Orchestrix.Abstractions/Orchestrix.Abstractions.csproj" />
   </Folder>
   <Folder Name="/docs/" />
+  <Folder Name="/src/Locking/">
+    <Project Path="src/Locking/Orchestrix.Locking.Abstractions/Orchestrix.Locking.Abstractions.csproj" />
+    <Project Path="src/Locking/Orchestrix.Locking.InMemory/Orchestrix.Locking.InMemory.csproj" />
+    <Project Path="src/Locking/Orchestrix.Locking.Redis/Orchestrix.Locking.Redis.csproj" />
+  </Folder>
   <Folder Name="/src/Transport/">
     <Project Path="src/Transport/Orchestrix.Transport.Abstractions/Orchestrix.Transport.Abstractions.csproj" />
   </Folder>
