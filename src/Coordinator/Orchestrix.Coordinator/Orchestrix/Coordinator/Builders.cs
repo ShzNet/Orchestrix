@@ -5,40 +5,25 @@ using Orchestrix.Transport;
 namespace Orchestrix.Coordinator;
 
 /// <summary>
-/// Internal implementation of ITransportBuilder.
+/// Internal implementation of ITransportConfigurationBuilder.
 /// </summary>
-internal class TransportBuilder : ITransportBuilder
+internal class TransportConfigurationBuilder(IServiceCollection services) : ITransportConfigurationBuilder
 {
-    public IServiceCollection Services { get; }
-
-    public TransportBuilder(IServiceCollection services)
-    {
-        Services = services;
-    }
+    public IServiceCollection Services { get; } = services;
 }
 
 /// <summary>
-/// Internal implementation of ILockingBuilder.
+/// Internal implementation of ILockingConfigurationBuilder.
 /// </summary>
-internal class LockingBuilder : ILockingBuilder
+internal class LockingConfigurationBuilder(IServiceCollection services) : ILockingConfigurationBuilder
 {
-    public IServiceCollection Services { get; }
-
-    public LockingBuilder(IServiceCollection services)
-    {
-        Services = services;
-    }
+    public IServiceCollection Services { get; } = services;
 }
 
 /// <summary>
-/// Internal implementation of IPersistenceBuilder.
+/// Internal implementation of IPersistenceConfigurationBuilder.
 /// </summary>
-internal class PersistenceBuilder : IPersistenceBuilder
+internal class PersistenceConfigurationBuilder(IServiceCollection services) : IPersistenceConfigurationBuilder
 {
-    public IServiceCollection Services { get; }
-
-    public PersistenceBuilder(IServiceCollection services)
-    {
-        Services = services;
-    }
+    public IServiceCollection Services { get; } = services;
 }

@@ -48,7 +48,7 @@ public class CoordinatorOptions
 /// Builder interface for configuring persistence.
 /// Extension methods should be defined in persistence packages (e.g., UseEfCore in Orchestrix.Persistence.EfCore).
 /// </summary>
-public interface IPersistenceBuilder
+public interface IPersistenceConfigurationBuilder
 {
     /// <summary>
     /// Gets the service collection.

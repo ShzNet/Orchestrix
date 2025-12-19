@@ -18,17 +18,17 @@ public class CoordinatorConfiguration
     /// <summary>
     /// Transport configuration builder.
     /// </summary>
-    public ITransportBuilder Transport { get; }
+    public ITransportConfigurationBuilder Transport { get; }
 
     /// <summary>
     /// Locking configuration builder.
     /// </summary>
-    public ILockingBuilder Locking { get; }
+    public ILockingConfigurationBuilder Locking { get; }
 
     /// <summary>
     /// Persistence configuration builder.
     /// </summary>
-    public IPersistenceBuilder Persistence { get; }
+    public IPersistenceConfigurationBuilder Persistence { get; }
 
     /// <summary>
     /// Runtime options for Coordinator.
@@ -40,9 +40,9 @@ public class CoordinatorConfiguration
     /// </summary>
     public CoordinatorConfiguration(
         IServiceCollection services,
-        ITransportBuilder transport,
-        ILockingBuilder locking,
-        IPersistenceBuilder persistence,
+        ITransportConfigurationBuilder transport,
+        ILockingConfigurationBuilder locking,
+        IPersistenceConfigurationBuilder persistence,
         CoordinatorOptions options)
     {
         Services = services;

@@ -5,6 +5,7 @@
     <RootNamespace>Orchestrix.Coordinator</RootNamespace>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <RootNamespace/>
     
     <PackageId>Orchestrix.Coordinator</PackageId>
     <Description>Orchestrix Coordinator - job scheduling, dispatching, and cluster coordination</Description>

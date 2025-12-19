@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using Orchestrix.Coordinator;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -22,9 +21,9 @@ public static class CoordinatorServiceCollectionExtensions
         var options = new CoordinatorOptions();
 
         // Create builders
-        var transportBuilder = new TransportBuilder(services);
-        var lockingBuilder = new LockingBuilder(services);
-        var persistenceBuilder = new PersistenceBuilder(services);
+        var transportBuilder = new TransportConfigurationBuilder(services);
+        var lockingBuilder = new LockingConfigurationBuilder(services);
+        var persistenceBuilder = new PersistenceConfigurationBuilder(services);
 
         // Create configuration
         var configuration = new CoordinatorConfiguration(
@@ -48,9 +47,12 @@ public static class CoordinatorServiceCollectionExtensions
             opt.DeadNodeCheckInterval = options.DeadNodeCheckInterval;
         });
 
+        // Register leader election
+        services.AddSingleton<Orchestrix.Coordinator.LeaderElection.ILeaderElection, Orchestrix.Coordinator.LeaderElection.LeaderElection>();
+        services.AddHostedService<Orchestrix.Coordinator.LeaderElection.LeaderElectionHostedService>();
+
         // TODO: Register core services (will be added in later stages)
         // - CoordinatorService (IHostedService)
-        // - Leader election
         // - Background services
         // - Handlers
 

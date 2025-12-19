@@ -4,11 +4,12 @@ namespace Orchestrix.Transport;
 
 /// <summary>
 /// Builder interface for configuring transport services.
+/// Extension methods should be defined in transport implementation packages (e.g., UseRedis in Orchestrix.Transport.Redis).
 /// </summary>
-public interface ITransportBuilder
+public interface ITransportConfigurationBuilder
 {
     /// <summary>
-    /// Gets the service collection for registering transport dependencies.
+    /// Gets the service collection.
     /// </summary>
     IServiceCollection Services { get; }
 }

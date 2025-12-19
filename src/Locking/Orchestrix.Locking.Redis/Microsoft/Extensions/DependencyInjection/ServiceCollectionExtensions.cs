@@ -6,18 +6,18 @@ using StackExchange.Redis;
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// Extension methods for registering Redis locking services.
+/// Extension methods for configuring Redis locking.
 /// </summary>
-public static class RedisLockingServiceCollectionExtensions
+public static class LockingServiceCollectionExtensions
 {
     /// <summary>
-    /// Configures Redis distributed locking.
+    /// Configures Redis as the distributed lock provider.
     /// </summary>
-    /// <param name="builder">The locking builder.</param>
+    /// <param name="builder">The locking configuration builder.</param>
     /// <param name="connectionString">Redis connection string.</param>
-    /// <returns>The locking builder for chaining.</returns>
-    public static ILockingBuilder UseRedis(
-        this ILockingBuilder builder,
+    /// <returns>The locking configuration builder for chaining.</returns>
+    public static ILockingConfigurationBuilder UseRedis(
+        this ILockingConfigurationBuilder builder,
         string connectionString)
     {
         return UseRedis(builder, options =>
