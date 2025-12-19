@@ -460,22 +460,40 @@ src/Coordinator/
 
 ---
 
-## Stage 8: Rate Limiting ⏭️
+## Stage 8: Job Queue Scanning
 
-> **Status**: ⏭️ **SKIPPED**
+> **Goal**: Scan pending jobs from database and dispatch to workers
 > 
-> **Reason**: Rate limiting handled by workers (concurrency control)
+> **Folder**: `Orchestrix.Coordinator/QueueScanning/`
 > 
-> **Folder**: `Orchestrix.Coordinator/RateLimiting/`
+> **Files**: 1
 > 
-> **Files**: 0
+> **Complexity**: **MEDIUM** - Leader-only background service
 
-### Decision ✅
+### Implementation
 
-- Workers control their own concurrency via `MaxConcurrentJobs` setting
-- Workers pull jobs at their own pace from queues
-- No coordinator-side rate limiting needed
-- Simpler architecture, less complexity
+- [ ] **JobQueueScanner.cs** - Background service (Leader only)
+  - Check `ILeaderElection.IsLeader` before processing
+  - Run every 5 seconds
+  - Process flow:
+    1. Query pending jobs: `Status = Pending` AND (`ScheduledAt <= NOW` OR `ScheduledAt IS NULL`)
+    2. Order by: `Priority DESC`, `CreatedAt ASC`
+    3. Limit: 100 jobs per scan
+    4. For each job: call `IJobDispatcher.DispatchAsync(job)`
+  - Handle errors gracefully (log and continue)
+
+### Design Decisions
+
+- **Leader-only**: Prevent duplicate dispatching
+- **Batch size**: 100 jobs per scan to avoid overwhelming system
+- **Scan interval**: 5 seconds for responsive dispatching
+- **Priority ordering**: High priority jobs dispatched first
+
+### Verification
+
+- [ ] Create pending job → verify dispatched within 5 seconds
+- [ ] Create 200 pending jobs → verify batched dispatching (100 per scan)
+- [ ] Verify only leader dispatches jobs
 
 ---
 

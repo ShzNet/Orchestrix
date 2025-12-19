@@ -1,4 +1,8 @@
 using Orchestrix.Coordinator;
+using Orchestrix.Coordinator.Dispatching;
+using Orchestrix.Coordinator.LeaderElection;
+using Orchestrix.Coordinator.QueueScanning;
+using Orchestrix.Coordinator.Scheduling;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -48,16 +52,19 @@ public static class CoordinatorServiceCollectionExtensions
         });
 
         // Register leader election
-        services.AddSingleton<Orchestrix.Coordinator.LeaderElection.ILeaderElection, Orchestrix.Coordinator.LeaderElection.LeaderElection>();
-        services.AddHostedService<Orchestrix.Coordinator.LeaderElection.LeaderElectionHostedService>();
+        services.AddSingleton<ILeaderElection, LeaderElection>();
+        services.AddHostedService<LeaderElectionHostedService>();
 
         // Register scheduling services
-        services.AddSingleton<Orchestrix.Coordinator.Scheduling.IScheduler, Orchestrix.Coordinator.Scheduling.Scheduler>();
-        services.AddSingleton<Orchestrix.Coordinator.Scheduling.JobPlanner>();
-        services.AddHostedService<Orchestrix.Coordinator.Scheduling.ScheduleScanner>();
+        services.AddSingleton<IScheduler, Scheduler>();
+        services.AddSingleton<JobPlanner>();
+        services.AddHostedService<ScheduleScanner>();
 
         // Register dispatching services
-        services.AddSingleton<Orchestrix.Coordinator.Dispatching.IJobDispatcher, Orchestrix.Coordinator.Dispatching.JobDispatcher>();
+        services.AddSingleton<IJobDispatcher, JobDispatcher>();
+
+        // Register queue scanning services
+        services.AddHostedService<JobQueueScanner>();
 
         // TODO: Register core services (will be added in later stages)
         // - CoordinatorService (IHostedService)
