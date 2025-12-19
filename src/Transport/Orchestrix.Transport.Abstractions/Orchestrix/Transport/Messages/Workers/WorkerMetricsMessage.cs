@@ -2,7 +2,7 @@ namespace Orchestrix.Transport.Messages.Workers;
 
 /// <summary>
 /// Worker metrics and heartbeat message.
-/// Contains worker-specific metrics only (not system-wide aggregates).
+/// Sent to worker.{workerId}.metrics channel.
 /// </summary>
 public class WorkerMetricsMessage
 {
@@ -12,10 +12,14 @@ public class WorkerMetricsMessage
     public string WorkerId { get; set; } = string.Empty;
 
     /// <summary>
-    /// Timestamp when metrics were collected.
-    /// Also serves as heartbeat timestamp.
+    /// Current worker status (e.g., "Running", "Draining", "Stopped").
     /// </summary>
-    public DateTimeOffset Timestamp { get; set; }
+    public string Status { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Queues this worker is subscribed to.
+    /// </summary>
+    public string[] Queues { get; set; } = [];
 
     /// <summary>
     /// Current number of jobs being processed by this worker.
@@ -25,7 +29,12 @@ public class WorkerMetricsMessage
     /// <summary>
     /// Maximum concurrent jobs this worker can handle.
     /// </summary>
-    public int MaxConcurrency { get; set; }
+    public int MaxConcurrentJobs { get; set; }
+
+    /// <summary>
+    /// Timestamp when metrics were collected (also serves as heartbeat).
+    /// </summary>
+    public DateTimeOffset Timestamp { get; set; }
 
     /// <summary>
     /// CPU usage in millicores (1000m = 1 core).

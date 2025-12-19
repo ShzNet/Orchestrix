@@ -460,34 +460,22 @@ src/Coordinator/
 
 ---
 
-## Stage 8: Rate Limiting
+## Stage 8: Rate Limiting ⏭️
 
-> **Goal**: Implement sliding window rate limiter
+> **Status**: ⏭️ **SKIPPED**
+> 
+> **Reason**: Rate limiting handled by workers (concurrency control)
 > 
 > **Folder**: `Orchestrix.Coordinator/RateLimiting/`
 > 
-> **Files**: 3
+> **Files**: 0
 
-### Implementation
+### Decision ✅
 
-- [ ] **IRateLimiter.cs**
-  - Method: `TryAcquireAsync(key, limit, window)` → bool
-
-- [ ] **RateLimitOptions.cs**
-  - Default limits configuration per queue
-
-- [ ] **SlidingWindowRateLimiter.cs** - Rate limiting algorithm
-  - Implementation approach:
-    1. Use `ConcurrentDictionary<string, Queue<DateTimeOffset>>` to track timestamps
-    2. On acquire: remove timestamps outside time window
-    3. Check if count < limit
-    4. If yes: add current timestamp and return true
-
-### Verification
-
-- [ ] Set limit 10 requests/60s → send 10 requests → all succeed
-- [ ] Send 11th request → should fail
-- [ ] Wait 60s → request should succeed again
+- Workers control their own concurrency via `MaxConcurrentJobs` setting
+- Workers pull jobs at their own pace from queues
+- No coordinator-side rate limiting needed
+- Simpler architecture, less complexity
 
 ---
 

@@ -60,7 +60,7 @@ src/Worker/Orchestrix.Worker/
       public string WorkerId { get; set; } = Guid.NewGuid().ToString("N");
       public string WorkerName { get; set; } = Environment.MachineName;
       public string[] Queues { get; set; } = ["default"];
-      public int MaxConcurrency { get; set; } = 10;
+      public int MaxConcurrentJobs { get; set; } = 10;  // Rate limiting via concurrency control
       public TimeSpan HeartbeatInterval { get; set; } = TimeSpan.FromSeconds(10);
   }
   ```
@@ -99,7 +99,8 @@ src/Worker/Orchestrix.Worker/
 
 - [ ] `JobConsumer.cs` : BackgroundService
   - Subscribe to `job.dispatch.{queue}` for each queue
-  - Use SemaphoreSlim for concurrency control
+  - Use `SemaphoreSlim(MaxConcurrentJobs)` for concurrency control
+  - Track current concurrent jobs count
   - Dispatch to JobExecutor
 
 ---
@@ -108,7 +109,10 @@ src/Worker/Orchestrix.Worker/
 
 - [ ] `HeartbeatService.cs` : BackgroundService
   - Publish to `worker.heartbeat` every N seconds
-  - Include: WorkerId, Status, ActiveJobs, Queues
+  - Include metrics:
+    - WorkerId, Status, Queues
+    - ActiveJobs (current concurrent jobs count)
+    - MaxConcurrentJobs (from config)
 
 ---
 
