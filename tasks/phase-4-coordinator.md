@@ -499,41 +499,22 @@ src/Coordinator/
 
 ---
 
-## Stage 9: Event Handlers
+## Stage 9: Event Handlers ⏭️
 
-> **Goal**: Handle incoming events from workers and clients
+> **Status**: ⏭️ **SKIPPED**
+> 
+> **Reason**: Worker metrics processing moved to Follower coordinators (Stage 10)
 > 
 > **Folder**: `Orchestrix.Coordinator/Handlers/`
 > 
-> **Files**: 3
+> **Files**: 0
 
-### Implementation
+### Decision ✅
 
-- [ ] **JobEnqueueHandler.cs** - Background service
-  - Subscribe to `job.enqueue` channel
-  - Processing flow:
-    1. Receive `JobEnqueueMessage`
-    2. Create `JobEntity` in database
-    3. Dispatch via `IJobDispatcher`
-
-- [ ] **WorkerHeartbeatHandler.cs** - Background service
-  - Subscribe to `worker.heartbeat` channel
-  - Processing flow:
-    1. Receive `WorkerHeartbeatMessage`
-    2. Upsert `WorkerEntity` (update LastHeartbeat, CurrentLoad, Status)
-
-- [ ] **JobTimeoutMonitor.cs** - Background service (Leader only)
-  - Run every 10 seconds
-  - Monitoring flow:
-    1. Query running jobs with timeout configured
-    2. If `StartedAt + Timeout < NOW` → mark job as `TimedOut`
-    3. Publish `JobCancelMessage` to `job.{jobId}.cancel` channel
-
-### Verification
-
-- [ ] Enqueue job → verify created in DB and dispatched
-- [ ] Worker sends heartbeat → verify WorkerEntity updated
-- [ ] Job exceeds timeout → verify marked as timed out and cancel message sent
+- **Worker metrics**: Follower coordinators will subscribe to `worker.{workerId}.metrics` and process worker heartbeats
+- **Job timeout**: Follower coordinators monitor job timeout via job status updates
+- **Job enqueue**: Clients enqueue jobs directly via Coordinator API (not via message channel)
+- **Simpler architecture**: Follower handles all job-related event processing
 
 ---
 
