@@ -41,6 +41,16 @@ public class JobEntity
     public string? CorrelationId { get; set; }
 
     /// <summary>
+    /// Optional: ID of the schedule that created this job (for cron schedules).
+    /// </summary>
+    public Guid? ScheduleId { get; set; }
+
+    /// <summary>
+    /// Optional: Type of schedule that created this job (e.g., "Cron").
+    /// </summary>
+    public string? ScheduleType { get; set; }
+
+    /// <summary>
     /// When the job was created.
     /// </summary>
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;

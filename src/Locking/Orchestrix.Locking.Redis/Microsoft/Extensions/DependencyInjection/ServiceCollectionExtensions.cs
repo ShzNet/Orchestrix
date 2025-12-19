@@ -32,8 +32,8 @@ public static class LockingServiceCollectionExtensions
     /// <param name="builder">The locking builder.</param>
     /// <param name="configure">Configuration action for Redis lock options.</param>
     /// <returns>The locking builder for chaining.</returns>
-    public static ILockingBuilder UseRedis(
-        this ILockingBuilder builder,
+    public static ILockingConfigurationBuilder UseRedis(
+        this ILockingConfigurationBuilder builder,
         Action<RedisLockOptions> configure)
     {
         var options = new RedisLockOptions();

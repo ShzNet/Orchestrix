@@ -43,10 +43,10 @@ This phase implements 12 major components that work together to provide distribu
 **How**: Use distributed lock with TTL, background renewal, automatic re-election on failure
 
 ### 6. Scheduling
-**Purpose**: Automatically create jobs from cron/interval schedules  
+**Purpose**: Automatically create jobs from cron schedules  
 **What**: Schedule scanner, cron parser, job planner  
 **Why**: Support recurring jobs without manual intervention  
-**How**: Leader scans DB every 10s for due schedules, creates jobs, updates next run time
+**How**: Leader scans DB every 10s for due cron schedules, creates jobs, updates next run time
 
 ### 7. Dispatching
 **Purpose**: Send jobs to workers for execution  
