@@ -1,8 +1,9 @@
-namespace Microsoft.Extensions.DependencyInjection;
-
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Orchestrix.Locking;
 using Orchestrix.Locking.Redis;
 using StackExchange.Redis;
+
+namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Extension methods for registering Redis locking services.
@@ -10,74 +11,44 @@ using StackExchange.Redis;
 public static class RedisLockingServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds Redis distributed locking services.
+    /// Configures Redis distributed locking.
     /// </summary>
-    /// <param name="services">The service collection.</param>
+    /// <param name="builder">The locking builder.</param>
     /// <param name="connectionString">Redis connection string.</param>
-    /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddRedisLocking(
-        this IServiceCollection services,
+    /// <returns>The locking builder for chaining.</returns>
+    public static ILockingBuilder UseRedis(
+        this ILockingBuilder builder,
         string connectionString)
     {
-        return AddRedisLocking(services, options =>
+        return UseRedis(builder, options =>
         {
             options.ConnectionString = connectionString;
         });
     }
 
     /// <summary>
-    /// Adds Redis distributed locking services.
+    /// Configures Redis distributed locking.
     /// </summary>
-    /// <param name="services">The service collection.</param>
+    /// <param name="builder">The locking builder.</param>
     /// <param name="configure">Configuration action for Redis lock options.</param>
-    /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddRedisLocking(
-        this IServiceCollection services,
+    /// <returns>The locking builder for chaining.</returns>
+    public static ILockingBuilder UseRedis(
+        this ILockingBuilder builder,
         Action<RedisLockOptions> configure)
     {
         var options = new RedisLockOptions();
         configure(options);
 
         // Register Redis connection as singleton
-        services.AddSingleton<IConnectionMultiplexer>(_ =>
+        builder.Services.TryAddSingleton<IConnectionMultiplexer>(_ =>
             ConnectionMultiplexer.Connect(options.ConnectionString));
 
         // Register options
-        services.AddSingleton(options);
+        builder.Services.AddSingleton(options);
 
         // Register lock provider
-        services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
+        builder.Services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
 
-        return services;
-    }
-
-    /// <summary>
-    /// Configures Redis distributed locking.
-    /// </summary>
-    /// <param name="options">The locking options.</param>
-    /// <param name="connectionString">Redis connection string.</param>
-    /// <returns>The locking options for chaining.</returns>
-    public static LockingOptions UseRedis(
-        this LockingOptions options,
-        string connectionString)
-    {
-        return UseRedis(options, redisOptions =>
-        {
-            redisOptions.ConnectionString = connectionString;
-        });
-    }
-
-    /// <summary>
-    /// Configures Redis distributed locking.
-    /// </summary>
-    /// <param name="options">The locking options.</param>
-    /// <param name="configure">Configuration action for Redis lock options.</param>
-    /// <returns>The locking options for chaining.</returns>
-    public static LockingOptions UseRedis(
-        this LockingOptions options,
-        Action<RedisLockOptions> configure)
-    {
-        options.Services.AddRedisLocking(configure);
-        return options;
+        return builder;
     }
 }

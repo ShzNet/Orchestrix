@@ -1,32 +1,23 @@
-namespace Microsoft.Extensions.DependencyInjection;
-
 using Orchestrix.Locking;
 using Orchestrix.Locking.InMemory;
+
+namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Extension methods for registering in-memory locking services.
 /// </summary>
-public static class ServiceCollectionExtensions
+public static class InMemoryLockingServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds in-memory distributed locking services.
+    /// Configures in-memory distributed locking (for development/testing).
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddInMemoryLocking(this IServiceCollection services)
+    /// <param name="builder">The locking builder.</param>
+    /// <returns>The locking builder for chaining.</returns>
+    public static ILockingBuilder UseInMemory(this ILockingBuilder builder)
     {
-        services.AddSingleton<IDistributedLockProvider, InMemoryLockProvider>();
-        return services;
-    }
+        // Register lock provider
+        builder.Services.AddSingleton<IDistributedLockProvider, InMemoryLockProvider>();
 
-    /// <summary>
-    /// Configures in-memory distributed locking.
-    /// </summary>
-    /// <param name="options">The locking options.</param>
-    /// <returns>The locking options for chaining.</returns>
-    public static LockingOptions UseInMemory(this LockingOptions options)
-    {
-        options.Services.AddSingleton<IDistributedLockProvider, InMemoryLockProvider>();
-        return options;
+        return builder;
     }
 }

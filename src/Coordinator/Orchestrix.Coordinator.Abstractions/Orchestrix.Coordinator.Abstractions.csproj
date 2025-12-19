@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../Transport/Orchestrix.Transport.Abstractions/Orchestrix.Transport.Abstractions.csproj" />
+    <ProjectReference Include="../../Locking/Orchestrix.Locking.Abstractions/Orchestrix.Locking.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

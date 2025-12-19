@@ -247,52 +247,43 @@ src/Coordinator/
 
 ---
 
-## Stage 3: Core Services & Options
+## Stage 3: Core Services & Options ✅
 
+> **Status**: ✅ **COMPLETE**
+> 
 > **Goal**: Setup basic coordinator structure and DI registration
 > 
 > **Projects**: `Orchestrix.Coordinator.Abstractions` + `Orchestrix.Coordinator`
 > 
-> **Files**: 6
+> **Files**: ~7 (2 abstractions + 2 implementations + 3 builder interfaces)
 
-### 3.1 Abstractions Project
+### 3.1 Abstractions Project ✅
 
-- [ ] Create `Orchestrix.Coordinator.Abstractions` project
-  - Target: `netstandard2.1`
-  - Reference: `Orchestrix.Abstractions`
+- [x] **CoordinatorOptions.cs** - Configuration class with nested builders ✅
+- [x] **ICoordinatorBuilder.cs** - Fluent builder interface ✅
+- [x] **IPersistenceBuilder.cs** - Persistence configuration interface ✅
 
-- [ ] **CoordinatorOptions.cs** - Configuration class
-  - Properties: `NodeId`, `HeartbeatInterval`, `LeaderLeaseDuration`, `LeaderRenewInterval`
+### 3.2 Core Implementation ✅
 
-- [ ] **ICoordinatorBuilder.cs** - Fluent builder interface
-  - Property: `IServiceCollection Services { get; }`
+- [x] **CoordinatorBuilder.cs** - Implements ICoordinatorBuilder ✅
+- [x] **Builders.cs** - Internal implementations of TransportBuilder, LockingBuilder, PersistenceBuilder ✅
+- [x] **ServiceCollectionExtensions.cs** - `AddOrchestrixCoordinator()` method ✅
 
-### 3.2 Core Implementation
+### 3.3 Builder Interfaces ✅
 
-- [ ] Create `Orchestrix.Coordinator` project
-  - Target: `netstandard2.1`
-  - References: `Coordinator.Abstractions`, `Persistence.Abstractions`, `Transport.Abstractions`, `Locking.Abstractions`
+- [x] **ITransportBuilder** - Added to Transport.Abstractions ✅
+- [x] **ILockingBuilder** - Added to Locking.Abstractions ✅
 
-- [ ] **CoordinatorBuilder.cs**
-  - Implement `ICoordinatorBuilder`
+### 3.4 Locking Implementations Updated ✅
 
-- [ ] **CoordinatorClusterOptions.cs**
-  - Cluster-specific configuration
+- [x] **Orchestrix.Locking.Redis** - UseRedis(ILockingBuilder) with TryAddSingleton ✅
+- [x] **Orchestrix.Locking.InMemory** - UseInMemory(ILockingBuilder) ✅
+- [x] Removed LockingOptions ✅
 
-- [ ] **ICoordinatorService.cs** / **CoordinatorService.cs**
-  - Implement `IHostedService`
-  - Orchestrate all sub-services (leader election, background services)
-  - `StartAsync`: Initialize leader election + start all background services
-  - `StopAsync`: Graceful shutdown
+### 3.5 Verification ✅
 
-- [ ] **ServiceCollectionExtensions.cs** (namespace: `Microsoft.Extensions.DependencyInjection`)
-  - Method: `AddOrchestrixCoordinator(Action<CoordinatorOptions>)` → returns `ICoordinatorBuilder`
-  - Register all services: `CoordinatorService`, background services, handlers
-
-### 3.3 Verification
-
-- [ ] Build both projects successfully
-- [ ] Verify DI registration works
+- [x] Build both projects successfully ✅
+- [x] Verify DI registration works ✅
 
 ---
 

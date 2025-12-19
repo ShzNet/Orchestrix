@@ -5,38 +5,28 @@ using StackExchange.Redis;
 /// <summary>
 /// Redis-based distributed lock implementation using SET NX EX pattern.
 /// </summary>
-internal class RedisLock : IDistributedLock
+internal class RedisLock(IDatabase database, string key, TimeSpan defaultTtl) : IDistributedLock
 {
-    private readonly IDatabase _database;
-    private readonly string _key;
-    private readonly string _token;
-    private readonly TimeSpan _defaultTtl;
-    private bool _isHeld;
+    private readonly string _token = Guid.NewGuid().ToString("N");
     private bool _disposed;
 
     // Lua script to safely release lock only if token matches
-    private const string ReleaseLuaScript = @"
-        if redis.call('get', KEYS[1]) == ARGV[1] then
-            return redis.call('del', KEYS[1])
-        else
-            return 0
-        end";
+    private const string ReleaseLuaScript = """
 
-    public RedisLock(IDatabase database, string key, TimeSpan defaultTtl)
-    {
-        _database = database;
-        _key = key;
-        _token = Guid.NewGuid().ToString("N");
-        _defaultTtl = defaultTtl;
-    }
+                                                    if redis.call('get', KEYS[1]) == ARGV[1] then
+                                                        return redis.call('del', KEYS[1])
+                                                    else
+                                                        return 0
+                                                    end
+                                            """;
 
-    public string Resource => _key;
+    public string Resource => key;
 
-    public bool IsHeld => _isHeld;
+    public bool IsHeld { get; private set; }
 
     public async Task<bool> TryAcquireAsync(TimeSpan timeout, CancellationToken ct = default)
     {
-        if (_isHeld)
+        if (IsHeld)
             return true;
 
         var deadline = DateTime.UtcNow.Add(timeout);
@@ -44,15 +34,15 @@ internal class RedisLock : IDistributedLock
         while (DateTime.UtcNow < deadline)
         {
             // SET key token NX EX ttl - atomic set-if-not-exists with expiration
-            _isHeld = await _database.StringSetAsync(
-                _key,
+            IsHeld = await database.StringSetAsync(
+                key,
                 _token,
-                _defaultTtl,
+                defaultTtl,
                 When.NotExists,
                 CommandFlags.None
             );
 
-            if (_isHeld)
+            if (IsHeld)
                 return true;
 
             // Wait a bit before retrying
@@ -64,12 +54,12 @@ internal class RedisLock : IDistributedLock
 
     public async Task<bool> ExtendAsync(TimeSpan duration, CancellationToken ct = default)
     {
-        if (!_isHeld)
+        if (!IsHeld)
             return false;
 
         // SET key token XX EX duration - extend only if key exists and token matches
-        var result = await _database.StringSetAsync(
-            _key,
+        var result = await database.StringSetAsync(
+            key,
             _token,
             duration,
             When.Exists,
@@ -79,32 +69,32 @@ internal class RedisLock : IDistributedLock
         // Verify the token still matches (could have been taken by someone else)
         if (result)
         {
-            var currentToken = await _database.StringGetAsync(_key);
-            _isHeld = currentToken == _token;
-            return _isHeld;
+            var currentToken = await database.StringGetAsync(key);
+            IsHeld = currentToken == _token;
+            return IsHeld;
         }
 
-        _isHeld = false;
+        IsHeld = false;
         return false;
     }
 
     public async Task ReleaseAsync(CancellationToken ct = default)
     {
-        if (!_isHeld)
+        if (!IsHeld)
             return;
 
         try
         {
             // Use Lua script to ensure we only delete if token matches
-            await _database.ScriptEvaluateAsync(
+            await database.ScriptEvaluateAsync(
                 ReleaseLuaScript,
-                new RedisKey[] { _key },
+                new RedisKey[] { key },
                 new RedisValue[] { _token }
             );
         }
         finally
         {
-            _isHeld = false;
+            IsHeld = false;
         }
     }
 
