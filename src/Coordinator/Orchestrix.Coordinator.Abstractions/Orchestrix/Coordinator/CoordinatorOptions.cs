@@ -1,11 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orchestrix.Locking;
-using Orchestrix.Transport;
 
 namespace Orchestrix.Coordinator;
 
 /// <summary>
-/// Configuration options for Coordinator.
+/// Runtime configuration options for Coordinator.
 /// </summary>
 public class CoordinatorOptions
 {
@@ -41,24 +39,9 @@ public class CoordinatorOptions
     public TimeSpan DeadNodeCheckInterval { get; set; } = TimeSpan.FromSeconds(15);
 
     /// <summary>
-    /// Gets the service collection for nested configuration.
+    /// Prefix for cache keys (allows multiple Orchestrix instances on same cache).
     /// </summary>
-    public IServiceCollection Services { get; set; } = null!;
-
-    /// <summary>
-    /// Transport configuration builder.
-    /// </summary>
-    public ITransportBuilder Transport { get; set; } = null!;
-
-    /// <summary>
-    /// Locking configuration builder.
-    /// </summary>
-    public ILockingBuilder Locking { get; set; } = null!;
-
-    /// <summary>
-    /// Persistence configuration builder.
-    /// </summary>
-    public IPersistenceBuilder Persistence { get; set; } = null!;
+    public string CachePrefix { get; set; } = "orchestrix";
 }
 
 /// <summary>

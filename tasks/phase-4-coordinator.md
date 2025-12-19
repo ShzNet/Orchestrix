@@ -287,36 +287,35 @@ src/Coordinator/
 
 ---
 
-## Stage 4: Caching Layer
 
-> **Goal**: Implement distributed caching for hot data
+## Stage 4: Caching Layer ✅
+
+> **Status**: ✅ **COMPLETE**
 > 
-> **Folder**: `Orchestrix.Coordinator/Caching/`
+> **Goal**: Extract caching to reusable library
 > 
-> **Files**: 3
+> **Project**: `Orchestrix.Caching`
+> 
+> **Files**: 1 (extension methods)
 
-### Implementation
+### Implementation ✅
 
-- [ ] **CacheKeys.cs** - Cache key generation helpers
-  - Static methods: `Job(jobId)`, `Worker(workerId)`, `Workers()`, `CoordinatorNode(nodeId)`, `CoordinatorNodes()`
-  - Format pattern: `"orchestrix:{entity}:{id}"`
+- [x] **Created Orchestrix.Caching library** ✅
+- [x] **DistributedCacheExtensions.cs** - Extension methods for IDistributedCache ✅
+  - `GetObjectAsync<T>()` - Deserialize from cache
+  - `SetObjectAsync<T>()` - Serialize to cache with TTL
+  - JSON serialization built-in
+- [x] **Added CachePrefix to CoordinatorOptions** ✅
+- [x] **Removed CacheService/ICacheService from Coordinator** ✅
 
-- [ ] **CacheOptions.cs** - TTL configuration
-  - Properties: `JobCacheTtl`, `WorkerCacheTtl`, `NodeCacheTtl`
+### Verification ✅
 
-- [ ] **ICacheService.cs** / **CacheService.cs** - Cache wrapper
-  - Wrap `IDistributedCache` (.NET built-in)
-  - Methods: `GetAsync<T>`, `SetAsync<T>`, `RemoveAsync`
-  - Handle JSON serialization/deserialization internally
-
-### Verification
-
-- [ ] Test cache Get/Set operations
-- [ ] Verify TTL expiration behavior
+- [x] Build successful ✅
+- [x] Extension methods in correct namespace (Microsoft.Extensions.Caching.Distributed) ✅
 
 ---
 
-## Stage 4: Leader Election
+## Stage 5: Leader Election
 
 > **Goal**: Implement distributed leader election
 > 

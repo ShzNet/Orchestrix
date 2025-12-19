@@ -3,9 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Orchestrix.Coordinator;
 
 /// <summary>
-/// Implementation of ICoordinatorBuilder for fluent configuration.
+/// Implementation of ICoordinatorConfigurationBuilder for fluent configuration.
 /// </summary>
-internal class CoordinatorBuilder : ICoordinatorBuilder
+internal class CoordinatorBuilder : ICoordinatorConfigurationBuilder
 {
     public CoordinatorBuilder(IServiceCollection services)
     {

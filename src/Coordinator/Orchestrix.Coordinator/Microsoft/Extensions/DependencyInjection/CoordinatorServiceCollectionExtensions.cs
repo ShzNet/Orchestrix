@@ -12,23 +12,40 @@ public static class CoordinatorServiceCollectionExtensions
     /// Adds Orchestrix Coordinator services to the service collection.
     /// </summary>
     /// <param name="services">The service collection.</param>
-    /// <param name="configureOptions">Optional configuration action for CoordinatorOptions.</param>
+    /// <param name="configure">Configuration action for Coordinator.</param>
     /// <returns>A builder for further configuration.</returns>
-    public static ICoordinatorBuilder AddOrchestrixCoordinator(
+    public static ICoordinatorConfigurationBuilder AddOrchestrixCoordinator(
         this IServiceCollection services,
-        Action<CoordinatorOptions>? configureOptions = null)
+        Action<CoordinatorConfiguration>? configure = null)
     {
-        // Register options with nested builders
+        // Create options
+        var options = new CoordinatorOptions();
+
+        // Create builders
+        var transportBuilder = new TransportBuilder(services);
+        var lockingBuilder = new LockingBuilder(services);
+        var persistenceBuilder = new PersistenceBuilder(services);
+
+        // Create configuration
+        var configuration = new CoordinatorConfiguration(
+            services,
+            transportBuilder,
+            lockingBuilder,
+            persistenceBuilder,
+            options);
+
+        // Apply user configuration
+        configure?.Invoke(configuration);
+
+        // Register options
         services.Configure<CoordinatorOptions>(opt =>
         {
-            // Initialize nested builders
-            opt.Services = services;
-            opt.Transport = new TransportBuilder(services);
-            opt.Locking = new LockingBuilder(services);
-            opt.Persistence = new PersistenceBuilder(services);
-
-            // Apply user configuration
-            configureOptions?.Invoke(opt);
+            opt.NodeId = options.NodeId;
+            opt.HeartbeatInterval = options.HeartbeatInterval;
+            opt.LeaderLeaseDuration = options.LeaderLeaseDuration;
+            opt.LeaderRenewInterval = options.LeaderRenewInterval;
+            opt.NodeTimeout = options.NodeTimeout;
+            opt.DeadNodeCheckInterval = options.DeadNodeCheckInterval;
         });
 
         // TODO: Register core services (will be added in later stages)

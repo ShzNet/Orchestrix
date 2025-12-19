@@ -12,7 +12,7 @@ namespace Orchestrix.Coordinator;
 /// - UseRedisLocking() in Orchestrix.Locking.Redis
 /// - UseEfCorePersistence() in Orchestrix.Persistence.EfCore
 /// </remarks>
-public interface ICoordinatorBuilder
+public interface ICoordinatorConfigurationBuilder
 {
     /// <summary>
     /// Gets the service collection for registering dependencies.
