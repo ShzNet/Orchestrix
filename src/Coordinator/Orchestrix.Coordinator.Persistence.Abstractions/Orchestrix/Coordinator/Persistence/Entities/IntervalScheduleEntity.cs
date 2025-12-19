@@ -8,27 +8,27 @@ public class IntervalScheduleEntity
     /// <summary>
     /// Unique schedule identifier.
     /// </summary>
-    public required Guid Id { get; init; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Human-readable schedule name.
     /// </summary>
-    public required string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Interval between executions.
     /// </summary>
-    public required TimeSpan Interval { get; set; }
+    public TimeSpan Interval { get; set; }
 
     /// <summary>
     /// Job type to execute.
     /// </summary>
-    public required string JobType { get; set; }
+    public string JobType { get; set; } = string.Empty;
 
     /// <summary>
     /// Queue for job execution.
     /// </summary>
-    public required string Queue { get; set; }
+    public string Queue { get; set; } = string.Empty;
 
     /// <summary>
     /// Job arguments as JSON.

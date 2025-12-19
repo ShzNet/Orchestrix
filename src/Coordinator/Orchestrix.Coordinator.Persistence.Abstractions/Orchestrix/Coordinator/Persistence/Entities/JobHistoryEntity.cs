@@ -9,17 +9,17 @@ public class JobHistoryEntity
     /// <summary>
     /// Unique history record identifier.
     /// </summary>
-    public required Guid Id { get; init; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Reference to the parent job.
     /// </summary>
-    public required Guid JobId { get; set; }
+    public Guid JobId { get; set; }
 
     /// <summary>
     /// Attempt number (1-based).
     /// </summary>
-    public required int AttemptNumber { get; set; }
+    public int AttemptNumber { get; set; }
 
     /// <summary>
     /// ID of the worker that executed this attempt.

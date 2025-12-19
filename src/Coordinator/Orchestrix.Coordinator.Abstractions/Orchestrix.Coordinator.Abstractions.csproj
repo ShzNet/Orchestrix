@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>Orchestrix.Coordinator</RootNamespace>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    
+    <PackageId>Orchestrix.Coordinator.Abstractions</PackageId>
+    <Description>Communication abstractions for Orchestrix Coordinator - channels and messages</Description>
+    <Authors>Shizaki</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Transport/Orchestrix.Transport.Abstractions/Orchestrix.Transport.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -185,91 +185,38 @@ src/Coordinator/
 
 ---
 
-## Stage 2: Communication Abstractions
+## Stage 2: Communication Abstractions ✅
 
+> **Status**: ✅ **COMPLETE**
+> 
 > **Goal**: Define channels and messages for external communication
 > 
 > **Project**: `Orchestrix.Coordinator.Abstractions`
 > 
 > **Folder**: `Orchestrix/Coordinator/Communication/`
 > 
-> **Files**: ~4 (channel helpers + message classes)
+> **Files**: ~5 (1 channel helper + 1 enum + 3 messages)
 > 
 > **Purpose**: Define communication contracts for:
 > - Coordinator ↔ Coordinator (cluster coordination)
 > - **Note**: Job events are shared across Worker, Coordinator, and Control Panel (already defined in `Orchestrix.Transport.Abstractions`)
 > - **Note**: Admin/Control Panel communication will be designed later
 
-### 2.1 Channel Helpers
+### 2.1 Channel Helpers ✅
 
-- [ ] **CoordinatorChannels.cs** - Channel name builder (follows TransportChannels pattern)
-  ```csharp
-  public class CoordinatorChannels
-  {
-      private readonly string _prefix;
-      
-      // Constructor accepting TransportOptions (reuse existing options)
-      public CoordinatorChannels(TransportOptions options)
-      {
-          _prefix = options.ChannelPrefix;
-      }
-      
-      // Constructor with custom prefix
-      public CoordinatorChannels(string prefix = "orchestrix")
-      {
-          _prefix = prefix;
-      }
-      
-      // Coordinator cluster channels
-      public string CoordinatorMetrics => $"{_prefix}:coordinator:metrics";
-      public string JobHandoff => $"{_prefix}:job:handoff";
-      public string JobHandoffAck(string nodeId) => $"{_prefix}:job:handoff:ack:{nodeId}";
-      
-      // Job dispatched event (broadcast to followers)
-      public string JobDispatched => $"{_prefix}:job:dispatched";
-  }
-  ```
+- [x] **CoordinatorChannels.cs** - Channel name builder (follows TransportChannels pattern) ✅
+  - `CoordinatorMetrics` - Node metrics + heartbeat
+  - `JobDispatched` - Broadcast to followers
+  - `JobHandoff` - Job reassignment (no ACK needed - DB update is confirmation)
+- [x] **CoordinatorRole.cs** - Coordinator role enum (Leader/Follower) ✅
 
-**Note**: Job channels (`job.dispatch`, `job.{id}.status`, `job.{id}.logs`) and Worker channels (`worker.join`, `worker.{id}.metrics`) are already defined in `TransportChannels` and shared across all components.
+**Note**: Job channels (`job.dispatch`, `job.{executionId}.status`, `job.{executionId}.logs`) and Worker channels (`worker.join`, `worker.{id}.metrics`) are already defined in `TransportChannels` and shared across all components.
 
-### 2.2 Coordinator Cluster Messages
+### 2.2 Coordinator Cluster Messages ✅
 
-**Folder**: `Communication/Cluster/`
-
-- [ ] **NodeMetricsMessage.cs**
-  - Properties: 
-    - `NodeId`, `Role`, `Timestamp`
-    - **Metrics**: `JobCount`, `PendingJobs`, `RunningJobs`, `CompletedJobs`, `FailedJobs`, `JobsPerSecond`
-  - Published to: `{prefix}.coordinator.metrics` (Queue with **Consumer Groups**)
-  - **Consumer Groups**:
-    - `coordinator-leader` - Leader consumes to update node metrics in DB (for dead node detection)
-    - `admin-ui` - Control Panel consumes to push realtime metrics to FE
-  - Purpose: Node metrics + health monitoring (replaces separate heartbeat)
-
-- [ ] **JobDispatchedEvent.cs**
-  - Properties: `JobId`, `Queue`, `JobType`, `Timestamp`
-  - Published to: `{prefix}.job.dispatched` (Topic - **Broadcast** to all followers)
-  - **Purpose**: Notify all followers that a job was dispatched
-  - **Ownership Pattern** (Race to claim):
-    1. Leader dispatches job → publishes to `job.dispatch.{queue}` (for workers)
-    2. Leader broadcasts `JobDispatchedEvent` to `job.dispatched` (for followers)
-    3. **All followers receive** the event
-    4. Followers **race to claim ownership**: first to successfully update DB wins
-       - `UPDATE Jobs SET FollowerNodeId = @nodeId WHERE Id = @jobId AND FollowerNodeId IS NULL`
-    5. Winner subscribes to `job.{jobId}.status` and `job.{jobId}.logs`
-    6. Losers ignore (already claimed)
-
-- [ ] **JobHandoffMessage.cs**
-  - Properties: `JobId`, `FromNodeId`, `Reason` (Drain/Crash), `Timestamp`
-  - Published to: `{prefix}.job.handoff` (Queue with Consumer Group - competing consumers)
-  - Purpose: Reassign job ownership during scale down or crash recovery
-
-- [ ] **JobHandoffAckMessage.cs**
-  - Properties: `JobId`, `NewOwnerNodeId`, `Timestamp`
-  - Published to: `{prefix}.job.handoff.ack.{originalNodeId}` (Topic - point-to-point)
-  - Purpose: Acknowledge job handoff completion
-
-**Note**: Removed `LoadInfoMessage`, `RebalanceRequestMessage`, `RebalanceResponseMessage` - these are handled through job handoff mechanism instead.
+- [x] **NodeMetricsMessage.cs** ✅ - Node metrics + heartbeat (combined)
+- [x] **JobDispatchedEvent.cs** ✅ - Broadcast to followers for race-to-claim ownership (with ExecutionId)
+- [x] **JobHandoffMessage.cs** ✅ - Job reassignment during scale down/crash (with ExecutionId and HandoffReason enum)
 
 ### Shared Channels (from Transport.Abstractions)
 

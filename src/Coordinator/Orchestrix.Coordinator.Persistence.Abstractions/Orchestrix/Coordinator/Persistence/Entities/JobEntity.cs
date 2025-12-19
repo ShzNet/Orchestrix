@@ -8,27 +8,27 @@ public class JobEntity
     /// <summary>
     /// Unique job identifier.
     /// </summary>
-    public required Guid Id { get; init; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Fully qualified job type name (e.g., "MyApp.Jobs.SendEmailJob").
     /// </summary>
-    public required string JobType { get; set; }
+    public string JobType { get; set; } = string.Empty;
 
     /// <summary>
     /// Queue name for job routing.
     /// </summary>
-    public required string Queue { get; set; }
+    public string Queue { get; set; } = string.Empty;
 
     /// <summary>
     /// Job arguments as JSON.
     /// </summary>
-    public required string ArgumentsJson { get; set; }
+    public string ArgumentsJson { get; set; } = string.Empty;
 
     /// <summary>
     /// Current job status.
     /// </summary>
-    public required JobStatus Status { get; set; }
+    public JobStatus Status { get; set; }
 
     /// <summary>
     /// Job priority (higher = more important).

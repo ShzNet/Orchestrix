@@ -8,12 +8,12 @@ public class LogEntry
     /// <summary>
     /// Unique log entry identifier.
     /// </summary>
-    public required Guid Id { get; init; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Reference to the job.
     /// </summary>
-    public required Guid JobId { get; set; }
+    public Guid JobId { get; set; }
 
     /// <summary>
     /// When the log entry was created.
@@ -23,12 +23,12 @@ public class LogEntry
     /// <summary>
     /// Log level (e.g., "Info", "Warning", "Error").
     /// </summary>
-    public required string Level { get; set; }
+    public string Level { get; set; } = string.Empty;
 
     /// <summary>
     /// Log message.
     /// </summary>
-    public required string Message { get; set; }
+    public string Message { get; set; } = string.Empty;
 
     /// <summary>
     /// Exception details if applicable.

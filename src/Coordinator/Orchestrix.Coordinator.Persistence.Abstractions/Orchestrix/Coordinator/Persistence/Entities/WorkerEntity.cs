@@ -8,12 +8,12 @@ public class WorkerEntity
     /// <summary>
     /// Unique worker identifier.
     /// </summary>
-    public required string WorkerId { get; init; }
+    public string WorkerId { get; set; } = string.Empty;
 
     /// <summary>
     /// Queues this worker can process.
     /// </summary>
-    public required string[] Queues { get; set; }
+    public string[] Queues { get; set; } = [];
 
     /// <summary>
     /// Maximum concurrent jobs this worker can handle.

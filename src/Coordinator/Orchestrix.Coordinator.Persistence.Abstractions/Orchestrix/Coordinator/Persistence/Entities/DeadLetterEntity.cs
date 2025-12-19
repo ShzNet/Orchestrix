@@ -8,32 +8,32 @@ public class DeadLetterEntity
     /// <summary>
     /// Unique dead letter identifier.
     /// </summary>
-    public required Guid Id { get; init; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Original job ID that failed.
     /// </summary>
-    public required Guid OriginalJobId { get; set; }
+    public Guid OriginalJobId { get; set; }
 
     /// <summary>
     /// Job type.
     /// </summary>
-    public required string JobType { get; set; }
+    public string JobType { get; set; } = string.Empty;
 
     /// <summary>
     /// Queue name.
     /// </summary>
-    public required string Queue { get; set; }
+    public string Queue { get; set; } = string.Empty;
 
     /// <summary>
     /// Job arguments as JSON.
     /// </summary>
-    public required string ArgumentsJson { get; set; }
+    public string ArgumentsJson { get; set; } = string.Empty;
 
     /// <summary>
     /// Last error message before giving up.
     /// </summary>
-    public required string LastError { get; set; }
+    public string LastError { get; set; } = string.Empty;
 
     /// <summary>
     /// Total number of attempts made.

@@ -8,7 +8,7 @@ public class CoordinatorNodeEntity
     /// <summary>
     /// Unique coordinator node identifier.
     /// </summary>
-    public required string NodeId { get; init; }
+    public string NodeId { get; set; } = string.Empty;
 
     /// <summary>
     /// Current role of this coordinator node.
@@ -39,22 +39,6 @@ public class CoordinatorNodeEntity
     /// When the node first joined the cluster.
     /// </summary>
     public DateTimeOffset JoinedAt { get; set; } = DateTimeOffset.UtcNow;
-}
-
-/// <summary>
-/// Coordinator role enumeration.
-/// </summary>
-public enum CoordinatorRole
-{
-    /// <summary>
-    /// Leader coordinator (handles scheduling and dispatching).
-    /// </summary>
-    Leader,
-
-    /// <summary>
-    /// Follower coordinator (handles job event processing).
-    /// </summary>
-    Follower
 }
 
 /// <summary>

@@ -12,10 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PolySharp">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <ProjectReference Include="../Orchestrix.Coordinator.Abstractions/Orchestrix.Coordinator.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>
