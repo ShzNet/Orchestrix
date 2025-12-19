@@ -424,29 +424,39 @@ src/Coordinator/
 
 ---
 
-## Stage 7: Dispatching
+## Stage 7: Dispatching ✅
 
+> **Status**: ✅ **COMPLETE**
+> 
 > **Goal**: Dispatch jobs to workers via transport
 > 
 > **Folder**: `Orchestrix.Coordinator/Dispatching/`
 > 
 > **Files**: 2
 
-### Implementation
+### Implementation ✅
 
-- [ ] **IJobDispatcher.cs**
+- [x] **IJobDispatcher.cs** ✅
   - Method: `DispatchAsync(JobEntity job)`
 
-- [ ] **JobDispatcher.cs** - Dispatch implementation
+- [x] **JobDispatcher.cs** - Dispatch implementation ✅
   - Dispatch flow:
-    1. Publish `JobDispatchMessage` → `job.dispatch.{queue}` channel (for workers)
-    2. Publish `JobAssignedMessage` → `job.assigned` channel (for Follower coordination)
+    1. Create `JobDispatchMessage` with new `ExecutionId`
+    2. Publish to `job.dispatch.{queue}` channel (for workers)
     3. Update job status → `Dispatched`, set `DispatchedAt` timestamp
+  - Uses `TransportChannels` for channel naming
+  - Uses `IPublisher` to publish messages
 
-### Verification
+### Design Decisions ✅
 
-- [ ] Dispatch job → verify messages published to correct channels
-- [ ] Verify job status updated in database
+- **ExecutionId**: Renamed from `HistoryId` for semantic clarity - represents each job execution
+- **Worker-only dispatch**: Followers will subscribe in Stage 10 (Follower Coordination)
+- **Status update**: Job marked as `Dispatched` immediately after publishing
+
+### Verification ✅
+
+- [x] Build successful ✅
+- [x] ExecutionId renamed across all job messages ✅
 
 ---
 

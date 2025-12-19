@@ -56,6 +56,9 @@ public static class CoordinatorServiceCollectionExtensions
         services.AddSingleton<Orchestrix.Coordinator.Scheduling.JobPlanner>();
         services.AddHostedService<Orchestrix.Coordinator.Scheduling.ScheduleScanner>();
 
+        // Register dispatching services
+        services.AddSingleton<Orchestrix.Coordinator.Dispatching.IJobDispatcher, Orchestrix.Coordinator.Dispatching.JobDispatcher>();
+
         // TODO: Register core services (will be added in later stages)
         // - CoordinatorService (IHostedService)
         // - Background services

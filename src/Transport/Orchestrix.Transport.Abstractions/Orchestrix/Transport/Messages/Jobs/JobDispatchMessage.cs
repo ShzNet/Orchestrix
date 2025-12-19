@@ -6,7 +6,7 @@ namespace Orchestrix.Transport.Messages.Jobs;
 public class JobDispatchMessage
 {
     public Guid JobId { get; set; }
-    public Guid HistoryId { get; set; }
+    public Guid ExecutionId { get; set; }
     public string JobType { get; set; } = string.Empty;
     public string Arguments { get; set; } = string.Empty;
     public int RetryCount { get; set; }

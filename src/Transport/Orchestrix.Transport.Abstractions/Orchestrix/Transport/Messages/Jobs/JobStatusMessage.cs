@@ -8,7 +8,7 @@ using Orchestrix.Enums;
 public class JobStatusMessage
 {
     public Guid JobId { get; set; }
-    public Guid HistoryId { get; set; }
+    public Guid ExecutionId { get; set; }
     public JobStatus Status { get; set; }
     public string? Result { get; set; }
     public string? Error { get; set; }
