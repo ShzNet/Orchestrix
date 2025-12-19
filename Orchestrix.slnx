@@ -11,5 +11,8 @@
   <Folder Name="/src/Transport/">
     <Project Path="src/Transport/Orchestrix.Transport.Abstractions/Orchestrix.Transport.Abstractions.csproj" />
   </Folder>
+  <Folder Name="/src/Coordinator/">
+    <Project Path="src/Coordinator/Orchestrix.Coordinator.Persistence.Abstractions/Orchestrix.Coordinator.Persistence.Abstractions.csproj" />
+  </Folder>
   <Folder Name="/tests/" />
 </Solution>

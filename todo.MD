@@ -13,7 +13,7 @@
 | 1 | `Orchestrix.Abstractions` | ✅ Done |
 | 2 | `Orchestrix.Transport.*` | 🔄 In Progress |
 | 3 | `Orchestrix.Locking.*` | ✅ Done |
-| 4 | `Orchestrix.Coordinator.*` | 🔲 TODO |
+| 4 | `Orchestrix.Coordinator.*` | 🔄 In Progress (Stage 1/13 ✅) |
 | 5 | `Orchestrix.Worker` | 🔲 TODO |
 | 6 | `Orchestrix.Persistence.*` | 🔲 TODO |
 | 7 | `Orchestrix.ControlPanel` | 🔲 TODO |
@@ -100,17 +100,18 @@ All projects inherit from `Directory.Build.props`:
 - [x] **3.2 InMemory implementation** - SemaphoreSlim-based, ConcurrentDictionary pooling
 - [x] **3.3 Redis implementation** - SET NX EX pattern, Lua script for safe release
 
-### Phase 4: Coordinator Core
+### Phase 4: Coordinator Core 🔄
 > 📄 [`tasks/phase-4-coordinator.md`](./tasks/phase-4-coordinator.md)
 > 📄 [`docs/coordinator-implementation-todo.MD`](./docs/coordinator-implementation-todo.MD)
-- [ ] **Persistence.Abstractions** (entities + store interfaces)
-- [ ] Core services (CoordinatorService)
-- [ ] Caching layer
-- [ ] Leader Election
-- [ ] Scheduling & Dispatching
-- [ ] Follower coordination (Ownership)
-- [ ] Scale down / handoff (Clustering)
-- [ ] Handlers (Enqueue, Heartbeat, Timeout)
+- [x] **Stage 1: Persistence.Abstractions** ✅ (17 files: 8 entities + 8 stores + 1 enum)
+  - Use-case driven store interfaces (EnqueueAsync, TryClaimJobAsync, etc.)
+  - Follower coordination support (FollowerNodeId, ChannelsCleaned)
+  - Retry logic & Dead Letter Queue
+- [ ] **Stage 2: Communication Abstractions** (CoordinatorChannels + Messages)
+- [ ] **Stage 3: Core Services** (CoordinatorService, Options, Builder)
+- [ ] **Stage 4: Caching Layer**
+- [ ] **Stage 5: Leader Election**
+- [ ] **Stage 6-13**: Scheduling, Dispatching, Follower coordination, Handlers, etc.
 - [ ] **Unit Tests**: `LeaderElectionTests`, `JobDispatcherTests`, `JobStateMachineTests`, `SchedulerTests`
 
 

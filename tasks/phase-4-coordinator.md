@@ -107,94 +107,81 @@ src/Coordinator/
 
 ---
 
-## Stage 1: Persistence Abstractions
+## Stage 1: Persistence Abstractions ✅
 
+> **Status**: ✅ **COMPLETE**
+> 
 > **Goal**: Define all storage entities and interfaces
 > 
 > **Project**: `Orchestrix.Coordinator.Persistence.Abstractions`
 > 
-> **Dependencies**: `Orchestrix.Abstractions`
+> **Dependencies**: None (self-contained with PolySharp for `required` keyword)
 > 
-> **Files**: 16 (8 entities + 8 store interfaces)
+> **Files**: 17 (8 entities + 8 store interfaces + 1 enum)
 
-### 1.1 Project Setup
+### 1.1 Project Setup ✅
 
-- [ ] Create project targeting `netstandard2.1`
-- [ ] Add reference to `Orchestrix.Abstractions`
-- [ ] Create folder structure: `Orchestrix/Coordinator/Persistence/Entities/`
-- [ ] Add to solution under `/src/Coordinator/`
+- [x] Create project targeting `netstandard2.1`
+- [x] Add PolySharp package for `required` keyword support
+- [x] Create folder structure: `Orchestrix/Coordinator/Persistence/Entities/`
+- [x] Add to solution under `/src/Coordinator/`
+- [x] Create `JobStatus` enum
 
-### 1.2 Entities Implementation
+### 1.2 Entities Implementation ✅
 
 **Location**: `Entities/` subfolder
 
-- [ ] **JobEntity.cs** - Core job record
-  - Identity fields: `Id`, `JobType`, `Queue`
-  - Lifecycle tracking: `Status`, `Priority`, timestamps (`CreatedAt`, `ScheduledAt`, `DispatchedAt`, `StartedAt`, `CompletedAt`)
-  - Ownership: `FollowerNodeId` (which Coordinator owns this job), `WorkerId`
-  - Retry logic: `RetryCount`, `MaxRetries`, `RetryPolicyJson`
-  - Payload: `ArgumentsJson`, `Error`, `CorrelationId`
-  - Timeout: `Timeout` property
-  - Cleanup tracking: `ChannelsCleaned` flag
+- [x] **JobEntity.cs** - Core job record ✅
+- [x] **JobHistoryEntity.cs** - Execution history ✅
+- [x] **CronScheduleEntity.cs** - Cron-based recurring schedules ✅
+- [x] **IntervalScheduleEntity.cs** - Interval-based recurring schedules ✅
+- [x] **WorkerEntity.cs** - Worker registration and health tracking ✅
+- [x] **CoordinatorNodeEntity.cs** - Coordinator cluster node tracking ✅
+- [x] **LogEntry.cs** - Job execution logs ✅
+- [x] **DeadLetterEntity.cs** - Failed jobs after max retries ✅
 
-- [ ] **JobHistoryEntity.cs** - Execution history (one record per retry attempt)
-  - Fields: `Id`, `JobId`, `AttemptNumber`, `WorkerId`, `StartedAt`, `CompletedAt`, `Status`, `Error`, `Duration`
+### 1.3 Store Interfaces Implementation ✅
 
-- [ ] **CronScheduleEntity.cs** - Cron-based recurring schedules
-  - Fields: `Id`, `Name`, `CronExpression`, `JobType`, `Queue`, `ArgumentsJson`, `NextRunTime`, `LastRunTime`, `IsEnabled`, `TimeZone`
+**All interfaces refactored to be use-case driven instead of generic CRUD:**
 
-- [ ] **IntervalScheduleEntity.cs** - Interval-based recurring schedules
-  - Fields: `Id`, `Name`, `Interval`, `JobType`, `Queue`, `ArgumentsJson`, `NextRunTime`, `LastRunTime`, `IsEnabled`
+- [x] **IJobStore.cs** - Job lifecycle & coordination ✅
+  - `EnqueueAsync`, `MarkDispatchedAsync`, `UpdateStatusAsync`
+  - `GetPendingJobsAsync`, `GetDueScheduledJobsAsync`
+  - `TryClaimJobAsync`, `GetJobsByFollowerAsync`, `ReleaseJobsFromDeadFollowerAsync`
+  - `TryRetryJobAsync`, `MoveToDeadLetterAsync`
+  - `GetJobsNeedingCleanupAsync`, `MarkChannelsCleanedAsync`
 
-- [ ] **WorkerEntity.cs** - Worker registration and health tracking
-  - Fields: `WorkerId`, `Queues[]`, `MaxConcurrency`, `CurrentLoad`, `LastHeartbeat`, `Status`, `Metadata`
+- [x] **IJobHistoryStore.cs** - Execution history ✅
+  - `CreateAsync`, `GetByJobIdAsync`
 
-- [ ] **CoordinatorNodeEntity.cs** - Coordinator cluster node tracking
-  - Fields: `NodeId`, `Role` (Leader/Follower), `JobCount`, `LastHeartbeat`, `Status`, `Metadata`
+- [x] **ICronScheduleStore.cs** - Cron scheduling ✅
+  - `RegisterScheduleAsync`, `UpdateNextRunTimeAsync`, `SetEnabledAsync`
+  - `GetDueSchedulesAsync`, `RemoveScheduleAsync`, `GetAllSchedulesAsync`
 
-- [ ] **LogEntry.cs** - Job execution logs
-  - Fields: `Id`, `JobId`, `Timestamp`, `Level`, `Message`, `Exception`
+- [x] **IIntervalScheduleStore.cs** - Interval scheduling ✅
+  - `RegisterScheduleAsync`, `UpdateNextRunTimeAsync`, `SetEnabledAsync`
+  - `GetDueSchedulesAsync`, `RemoveScheduleAsync`, `GetAllSchedulesAsync`
 
-- [ ] **DeadLetterEntity.cs** - Failed jobs after max retries
-  - Fields: `Id`, `OriginalJobId`, `JobType`, `Queue`, `ArgumentsJson`, `LastError`, `TotalAttempts`, `FailedAt`
+- [x] **IWorkerStore.cs** - Worker lifecycle & capacity ✅
+  - `UpdateHeartbeatAsync`, `MarkDrainingAsync`, `RemoveWorkerAsync`
+  - `GetAvailableWorkersForQueueAsync`, `GetDeadWorkersAsync`, `GetAllActiveWorkersAsync`
 
-### 1.3 Store Interfaces Implementation
+- [x] **ICoordinatorNodeStore.cs** - Cluster coordination ✅
+  - `UpdateHeartbeatAsync`, `UpdateRoleAsync`, `IncrementJobCountAsync`, `DecrementJobCountAsync`
+  - `MarkDrainingAsync`, `RemoveNodeAsync`
+  - `GetDeadNodesAsync`, `GetActiveFollowersAsync`, `GetAllActiveNodesAsync`
 
-- [ ] **IJobStore.cs**
-  - Basic CRUD: `GetByIdAsync`, `CreateAsync`, `UpdateAsync`
-  - Follower queries: `GetByFollowerAsync`, `GetCountByFollowerAsync`, `ClearFollowerAsync`
-  - Scheduling queries: `GetPendingAsync`, `GetScheduledAsync`
-  - Cleanup queries: `GetForCleanupAsync`, `MarkChannelsCleanedAsync`
+- [x] **ILogStore.cs** - Job logs ✅
+  - `AppendAsync`, `GetByJobIdAsync`
 
-- [ ] **IJobHistoryStore.cs**
-  - Methods: `CreateAsync`, `GetByJobIdAsync`
+- [x] **IDeadLetterStore.cs** - Failed job tracking ✅
+  - `AddToDeadLetterAsync`, `GetAllDeadLettersAsync`, `GetByIdAsync`, `RemoveAsync`
 
-- [ ] **ICronScheduleStore.cs**
-  - CRUD methods
-  - Query: `GetDueSchedulesAsync` (NextRunTime <= now AND IsEnabled = true)
+### 1.4 Verification ✅
 
-- [ ] **IIntervalScheduleStore.cs**
-  - CRUD methods
-  - Query: `GetDueSchedulesAsync`
-
-- [ ] **IWorkerStore.cs**
-  - Methods: `GetByIdAsync`, `UpsertAsync`, `DeleteAsync`
-  - Queries: `GetActiveWorkersAsync`, `GetByQueueAsync`
-
-- [ ] **ICoordinatorNodeStore.cs**
-  - Methods: `GetByIdAsync`, `UpsertAsync`, `DeleteAsync`
-  - Queries: `GetActiveNodesAsync`, `GetDeadNodesAsync` (LastHeartbeat > timeout)
-
-- [ ] **ILogStore.cs**
-  - Methods: `AppendAsync`, `GetByJobIdAsync`
-
-- [ ] **IDeadLetterStore.cs**
-  - Methods: `CreateAsync`, `GetAllAsync`, `GetByIdAsync`
-
-### 1.4 Verification
-
-- [ ] Build project: `dotnet build`
-- [ ] Verify 0 warnings, 0 errors
+- [x] Build project: `dotnet build` ✅
+- [x] Verify 0 warnings, 0 errors ✅
+- [x] Added to solution ✅
 
 ---
 

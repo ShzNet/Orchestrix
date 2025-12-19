@@ -208,22 +208,24 @@ Orchestrix/
 | Core Abstractions | ✅ Completed |
 | Transport Abstractions | ✅ Completed |
 | Distributed Locking | ✅ Completed |
-| Immediate Jobs | 🔲 Planned |
-| Delayed Jobs | 🔲 Planned |
-| Cron Jobs | 🔲 Planned |
-| Interval Jobs | 🔲 Planned |
+| **Coordinator Persistence** | ✅ **Completed** |
+| Immediate Jobs | 🔄 In Progress |
+| Delayed Jobs | 🔄 In Progress |
+| Cron Jobs | 🔄 In Progress |
+| Interval Jobs | 🔄 In Progress |
 | Job Priorities | ✅ Foundation Ready |
 | Retry Policies | ✅ Foundation Ready |
-| Dead Letter Queue | 🔲 Planned |
+| Dead Letter Queue | ✅ Foundation Ready |
 | Job Cancellation | 🔲 Planned |
 | Progress Tracking | 🔲 Planned |
 | Real-time Logs | 🔲 Planned |
-| HA Coordinator | 🔲 Planned |
+| HA Coordinator | 🔄 In Progress |
 | Graceful Shutdown | 🔲 Planned |
 | Admin Dashboard | 🔲 Planned |
 
 **Legend:**
 - ✅ Completed - Feature fully implemented
+- 🔄 In Progress - Currently being implemented
 - ✅ Foundation Ready - Core types/abstractions ready
 - 🔲 Planned - Not yet started
 
