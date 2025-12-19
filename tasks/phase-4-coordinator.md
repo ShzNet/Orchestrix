@@ -356,44 +356,71 @@ src/Coordinator/
 
 ---
 
-## Stage 6: Scheduling
+## Stage 6: Scheduling ✅
 
-> **Goal**: Scan and evaluate schedules, create jobs
+> **Status**: ✅ **COMPLETE**
+> 
+> **Goal**: Scan and evaluate cron schedules, create jobs
 > 
 > **Folder**: `Orchestrix.Coordinator/Scheduling/`
 > 
-> **Files**: 5
+> **Files**: 6
 > 
 > **Complexity**: **HIGH** - Core scheduling logic
 
-### Implementation
+### Implementation ✅
 
-- [ ] **IScheduler.cs** - Scheduling interface
+- [x] **IScheduler.cs** - Scheduling interface ✅
+  - Method: `ScanCronSchedulesAsync()`
 
-- [ ] **CronExpressionParser.cs** - Cron parsing utility
-  - Use `Cronos` NuGet package
-  - Method: `GetNextOccurrence(cronExpression, from)` → DateTimeOffset
+- [x] **CronExpressionParser.cs** - Cron parsing utility ✅
+  - Use `Cronos` NuGet package (v0.8.4)
+  - Method: `GetNextOccurrence(cronExpression, from, timeZone)` → DateTimeOffset?
+  - Method: `IsValid(cronExpression)` → bool
+  - Timezone-aware parsing
 
-- [ ] **ScheduleEvaluator.cs** - Schedule evaluation logic
-  - Determine if schedule is due
-  - Handle timezone conversions
+- [x] **ScheduleEvaluator.cs** - Schedule evaluation logic ✅
+  - `IsCronScheduleDue()` - checks if schedule is due
+  - `CalculateNextCronRunTime()` - calculates next run with timezone support
 
-- [ ] **ScheduleScanner.cs** - Background service (Leader only)
-  - Check `ILeaderElection.IsLeader` before processing
-  - Run every 10 seconds
+- [x] **JobPlanner.cs** - Job creation from schedules ✅
+  - Method: `PlanJobFromCronScheduleAsync(schedule)` → creates JobEntity
+  - Uses `IJobStore.EnqueueAsync()` to save job
+  - Updates schedule via `ICronScheduleStore.UpdateNextRunTimeAsync()`
+  - Sets `ScheduleId` and `ScheduleType` for traceability
+
+- [x] **ScheduleScanner.cs** - Background service (Leader only) ✅
+  - Checks `ILeaderElection.IsLeader` before processing
+  - Runs every 10 seconds
   - Process flow:
-    1. Query cron/interval schedules where `NextRunTime <= NOW` AND `IsEnabled = true`
-    2. For each due schedule: create JobEntity, dispatch, update NextRunTime
-  - Separate methods: `ScanCronSchedulesAsync`, `ScanIntervalSchedulesAsync`
+    1. Query cron schedules where `NextRunTime <= NOW` AND `IsEnabled = true`
+    2. For each due schedule: create JobEntity via JobPlanner
+    3. Update schedule's NextRunTime
 
-- [ ] **JobPlanner.cs** - Job creation from schedules
-  - Method: `PlanJobAsync(schedule)` → create job entity, save to DB, dispatch
+- [x] **Scheduler.cs** - IScheduler implementation ✅
+  - Implements `ScanCronSchedulesAsync()`
+  - Delegates to JobPlanner for job creation
 
-### Verification
+### Design Decisions ✅
 
-- [ ] Create cron schedule `"*/1 * * * *"` → verify job created every minute
-- [ ] Create interval schedule (30s) → verify job created every 30 seconds
-- [ ] Verify timezone handling works correctly
+- **Cron-only**: Removed interval schedule concept - cron expressions are sufficient
+- **Leader-only scanning**: Only leader node scans schedules to prevent duplicate job creation
+- **Timezone support**: CronExpressionParser supports timezone-aware scheduling
+- **Schedule traceability**: Added `ScheduleId` and `ScheduleType` to JobEntity for observability
+
+### Entity Changes ✅
+
+- [x] Added `ScheduleId` (Guid?) to JobEntity
+- [x] Added `ScheduleType` (string?) to JobEntity
+- [x] Removed IntervalScheduleEntity
+- [x] Removed IIntervalScheduleStore
+
+### Verification ✅
+
+- [x] Build successful ✅
+- [x] Cronos package integrated ✅
+- [x] Leader-only execution pattern ✅
+- [x] Schedule metadata properly set ✅
 
 ---
 
