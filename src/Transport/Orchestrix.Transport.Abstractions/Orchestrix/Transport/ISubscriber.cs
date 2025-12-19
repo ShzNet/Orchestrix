@@ -19,6 +19,23 @@ public interface ISubscriber
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Subscribes to a channel with a consumer group (competing consumers pattern).
+    /// Only one consumer in the group receives each message.
+    /// </summary>
+    /// <typeparam name="T">The message type.</typeparam>
+    /// <param name="channel">The channel name.</param>
+    /// <param name="groupName">The consumer group name.</param>
+    /// <param name="consumerName">The unique consumer name within the group.</param>
+    /// <param name="handler">The message handler. Returns true to continue, false to unsubscribe.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task SubscribeWithGroupAsync<T>(
+        string channel,
+        string groupName,
+        string consumerName,
+        Func<T, Task<bool>> handler,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Unsubscribes from a channel.
     /// </summary>
     /// <param name="channel">The channel name.</param>

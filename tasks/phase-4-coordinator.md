@@ -1,552 +1,806 @@
-# Phase 4: Coordinator Core
+# Phase 4: Coordinator - Implementation Stages
 
-> Central coordinator for job scheduling, dispatching, and cluster coordination.
-> See also: [`docs/coordinator-implementation-todo.MD`](../docs/coordinator-implementation-todo.MD)
+> **Coordinator** is the heart of Orchestrix - manages scheduling, dispatching, and cluster coordination.
 > 
-> **Note**: In single-node mode, the Coordinator acts as both **Leader** AND **Follower**.
-
-## Projects
-| Project | Target | Dependencies |
-|:--------|:-------|:-------------|
-| `Orchestrix.Coordinator.Abstractions` | netstandard2.1 | Orchestrix.Abstractions |
-| `Orchestrix.Coordinator.Persistence.Abstractions` | netstandard2.1 | Orchestrix.Abstractions |
-| `Orchestrix.Coordinator` | netstandard2.1 | Coordinator.Abstractions, Persistence.Abstractions, Transport.Abstractions, Locking.Abstractions |
+> **Architecture**: Hybrid Active-Active Cluster
+> - **Leader** (1 node): Scheduling, Dispatching, Timeout Monitoring
+> - **Follower** (all nodes): Event Processing, Load Balanced
 
 ---
 
-## Folder Structure
+## Components Overview
 
-### Coordinator.Abstractions
-```
-src/Coordinator/Orchestrix.Coordinator.Abstractions/
-├── Orchestrix.Coordinator.Abstractions.csproj
-└── Orchestrix/
-    └── Coordinator/
-        ├── CoordinatorOptions.cs
-        └── ICoordinatorBuilder.cs
-```
+This phase implements 12 major components that work together to provide distributed job coordination:
 
-### Coordinator.Persistence.Abstractions
-```
-src/Coordinator/Orchestrix.Coordinator.Persistence.Abstractions/
-├── Orchestrix.Coordinator.Persistence.Abstractions.csproj
-└── Orchestrix/
-    └── Coordinator/
-        └── Persistence/
-            ├── Entities/
-            │   ├── JobEntity.cs
-            │   ├── JobHistoryEntity.cs
-            │   ├── CronScheduleEntity.cs
-            │   ├── IntervalScheduleEntity.cs
-            │   ├── WorkerEntity.cs
-            │   ├── CoordinatorNodeEntity.cs
-            │   ├── LogEntry.cs
-            │   └── DeadLetterEntity.cs
-            ├── IJobStore.cs
-            ├── IJobHistoryStore.cs
-            ├── ICronScheduleStore.cs
-            ├── IIntervalScheduleStore.cs
-            ├── IWorkerStore.cs
-            ├── ICoordinatorNodeStore.cs
-            ├── ILogStore.cs
-            └── IDeadLetterStore.cs
-```
+### 1. Persistence Abstractions
+**Purpose**: Define storage contracts for all coordinator data  
+**What**: 8 entities (Job, Schedule, Worker, etc.) + 8 store interfaces  
+**Why**: Decouple coordinator logic from specific database implementations  
+**How**: Create abstract entities and repository interfaces that can be implemented with any storage backend (EF Core, Dapper, etc.)
 
-### Coordinator (Main Implementation)
-```
-src/Coordinator/Orchestrix.Coordinator/
-├── Orchestrix.Coordinator.csproj
-└── Orchestrix/
-    └── Coordinator/
-        ├── CoordinatorBuilder.cs
-        ├── CoordinatorClusterOptions.cs
-        ├── ICoordinatorService.cs
-        ├── CoordinatorService.cs
-        ├── ServiceCollectionExtensions.cs
-        ├── Caching/
-        │   ├── CacheKeys.cs
-        │   ├── CacheOptions.cs
-        │   ├── ICacheService.cs
-        │   └── CacheService.cs
-        ├── LeaderElection/
-        │   ├── ILeaderElection.cs
-        │   ├── LeaderElection.cs
-        │   └── LeaderElectionOptions.cs
-        ├── Coordination/
-        │   ├── ICoordinatorCoordinator.cs
-        │   ├── CoordinatorCoordinator.cs
-        │   └── CoordinatorCoordinatorOptions.cs
-        ├── Scheduling/
-        │   ├── IScheduler.cs
-        │   ├── CronExpressionParser.cs
-        │   ├── ScheduleEvaluator.cs
-        │   ├── ScheduleScanner.cs
-        │   └── JobPlanner.cs
-        ├── Dispatching/
-        │   ├── IJobDispatcher.cs
-        │   └── JobDispatcher.cs
-        ├── RateLimiting/
-        │   ├── IRateLimiter.cs
-        │   ├── RateLimitOptions.cs
-        │   └── SlidingWindowRateLimiter.cs
-        ├── Handlers/
-        │   ├── JobEnqueueHandler.cs
-        │   ├── WorkerHeartbeatHandler.cs
-        │   └── JobTimeoutMonitor.cs
-        ├── Ownership/
-        │   ├── IJobOwnershipRegistry.cs
-        │   ├── JobOwnershipRegistry.cs
-        │   ├── JobLoadInfo.cs
-        │   ├── JobAssignmentPublisher.cs
-        │   ├── JobAssignmentSubscriber.cs
-        │   ├── JobEventProcessor.cs
-        │   ├── JobOwnershipCleanup.cs
-        │   └── JobLoadBalancer.cs
-        ├── Clustering/
-        │   ├── CoordinatorNodeInfo.cs
-        │   ├── ICoordinatorNodeRegistry.cs
-        │   ├── CoordinatorNodeRegistry.cs
-        │   ├── CoordinatorHeartbeatService.cs
-        │   ├── CoordinatorHealthMonitor.cs
-        │   ├── CoordinatorDrainService.cs
-        │   ├── JobHandoffPublisher.cs
-        │   ├── JobHandoffSubscriber.cs
-        │   ├── JobHandoffAckListener.cs
-        │   └── OrphanJobDetector.cs
-        └── ChannelCleanup/
-            ├── ChannelCleanupScanner.cs
-            └── ChannelCleanupOptions.cs
-```
+### 2. Communication Abstractions
+**Purpose**: Define channels and messages for coordinator cluster communication  
+**What**: Channel constants and message classes for Coordinator-to-Coordinator communication  
+**Why**: Provide clear contracts for coordinator nodes to communicate. Admin/Control Panel communication will be designed later  
+**How**: Cluster Communication - Messages for coordinator coordination (metrics, job handoff)
 
-**Namespaces:**
-- `Orchestrix.Coordinator` - Core coordinator abstractions and services
-- `Orchestrix.Coordinator.Persistence` - Persistence abstractions (entities & stores)
-- `Orchestrix.Coordinator.Caching` - Caching services
-- `Orchestrix.Coordinator.LeaderElection` - Leader election logic
-- `Orchestrix.Coordinator.Coordination` - Coordinator-to-coordinator communication
-- `Orchestrix.Coordinator.Scheduling` - Job scheduling
-- `Orchestrix.Coordinator.Dispatching` - Job dispatching
-- `Orchestrix.Coordinator.RateLimiting` - Rate limiting
-- `Orchestrix.Coordinator.Handlers` - Event handlers
-- `Orchestrix.Coordinator.Ownership` - Job ownership & follower coordination
-- `Orchestrix.Coordinator.Clustering` - Cluster management & scale down
-- `Orchestrix.Coordinator.ChannelCleanup` - Channel cleanup logic
+### 3. Core Services
+**Purpose**: Provide foundation for coordinator functionality  
+**What**: Options classes, builder pattern, main service orchestration  
+**Why**: Enable flexible configuration and DI-based architecture  
+**How**: Implement `IHostedService` that manages lifecycle of all sub-components
+
+### 4. Caching Layer
+**Purpose**: Reduce database load for frequently accessed data  
+**What**: Distributed cache wrapper with key generation helpers  
+**Why**: Improve performance by caching hot data (jobs, workers, nodes)  
+**How**: Wrap `IDistributedCache` with typed methods and automatic serialization
+
+### 5. Leader Election
+**Purpose**: Ensure only one coordinator performs scheduling/monitoring  
+**What**: Distributed lock-based election with automatic failover  
+**Why**: Prevent duplicate job creation and race conditions  
+**How**: Use distributed lock with TTL, background renewal, automatic re-election on failure
+
+### 6. Scheduling
+**Purpose**: Automatically create jobs from cron/interval schedules  
+**What**: Schedule scanner, cron parser, job planner  
+**Why**: Support recurring jobs without manual intervention  
+**How**: Leader scans DB every 10s for due schedules, creates jobs, updates next run time
+
+### 7. Dispatching
+**Purpose**: Send jobs to workers for execution  
+**What**: Job dispatcher that publishes to transport channels  
+**Why**: Decouple job creation from execution  
+**How**: Publish to `job.dispatch.{queue}` for workers and `job.assigned` for follower coordination
+
+### 8. Rate Limiting
+**Purpose**: Control job dispatch rate per queue  
+**What**: Sliding window rate limiter  
+**Why**: Prevent overwhelming workers or downstream systems  
+**How**: Track timestamps in time window, reject requests exceeding limit
+
+### 9. Event Handlers
+**Purpose**: Process incoming events from workers and clients  
+**What**: Job enqueue handler, worker heartbeat handler, timeout monitor  
+**Why**: React to external events and maintain system state  
+**How**: Subscribe to transport channels, process messages, update database
+
+### 10. Follower Coordination (Ownership)
+**Purpose**: Distribute job event processing across coordinator nodes  
+**What**: Job ownership registry, assignment subscriber, event processor  
+**Why**: Scale event processing horizontally, ensure single source of truth per job  
+**How**: Use consumer groups for job assignment, each follower owns subset of jobs and subscribes to job-specific channels
+
+### 11. Clustering & Scale Down
+**Purpose**: Handle coordinator node failures and graceful shutdown  
+**What**: Heartbeat service, health monitor, drain service, handoff mechanism, orphan detector  
+**Why**: Ensure zero job loss during node failures or deployments  
+**How**: 
+- **Graceful**: Node draining hands off jobs to other nodes with ACK protocol
+- **Crash**: Leader detects dead nodes via heartbeat timeout, reassigns orphaned jobs
+
+### 12. Channel Cleanup
+**Purpose**: Remove job-specific channels after completion  
+**What**: Background scanner that closes channels  
+**Why**: Prevent channel/memory leaks in transport layer  
+**How**: Leader scans completed jobs, closes `job.{id}.status` and `job.{id}.logs` channels after delay
+
+### 13. Coordinator Communication
+**Purpose**: Enable direct messaging between coordinator nodes  
+**What**: Point-to-point and broadcast messaging  
+**Why**: Support advanced features like load rebalancing  
+**How**: Publish to `coordinator.{nodeId}.messages` or `coordinator.broadcast` channels
 
 ---
 
-## 4.0 Coordinator.Abstractions
+## Projects Structure
 
-> Options and Builder interface only. No registration logic here.
+```
+src/Coordinator/
+├── Orchestrix.Coordinator.Abstractions/
+├── Orchestrix.Coordinator.Persistence.Abstractions/
+└── Orchestrix.Coordinator/
+```
 
-> **Path:** `src/Coordinator/Orchestrix.Coordinator.Abstractions/`
-
-### Files
-- [ ] `CoordinatorOptions.cs`
-  ```csharp
-  public class CoordinatorOptions
-  {
-      public string NodeId { get; set; } = Guid.NewGuid().ToString();
-      public TimeSpan HeartbeatInterval { get; set; } = TimeSpan.FromSeconds(5);
-      public TimeSpan LeaderLeaseDuration { get; set; } = TimeSpan.FromSeconds(30);
-      public TimeSpan LeaderRenewInterval { get; set; } = TimeSpan.FromSeconds(10);
-  }
-  ```
-
-- [ ] `ICoordinatorBuilder.cs`
-  ```csharp
-  public interface ICoordinatorBuilder
-  {
-      IServiceCollection Services { get; }
-  }
-  ```
-
-**Files: 2**
+**Total**: ~62 files across 12 stages
 
 ---
 
-## 4.1 Coordinator.Persistence.Abstractions
+## Stage 1: Persistence Abstractions
 
-> **Path:** `src/Coordinator/Orchestrix.Coordinator.Persistence.Abstractions/`
+> **Goal**: Define all storage entities and interfaces
+> 
+> **Project**: `Orchestrix.Coordinator.Persistence.Abstractions`
+> 
+> **Dependencies**: `Orchestrix.Abstractions`
+> 
+> **Files**: 16 (8 entities + 8 store interfaces)
 
+### 1.1 Project Setup
 
+- [ ] Create project targeting `netstandard2.1`
+- [ ] Add reference to `Orchestrix.Abstractions`
+- [ ] Create folder structure: `Orchestrix/Coordinator/Persistence/Entities/`
+- [ ] Add to solution under `/src/Coordinator/`
 
-### Entities (in subfolder `Entities/`)
-- [ ] `JobEntity.cs`
+### 1.2 Entities Implementation
+
+**Location**: `Entities/` subfolder
+
+- [ ] **JobEntity.cs** - Core job record
+  - Identity fields: `Id`, `JobType`, `Queue`
+  - Lifecycle tracking: `Status`, `Priority`, timestamps (`CreatedAt`, `ScheduledAt`, `DispatchedAt`, `StartedAt`, `CompletedAt`)
+  - Ownership: `FollowerNodeId` (which Coordinator owns this job), `WorkerId`
+  - Retry logic: `RetryCount`, `MaxRetries`, `RetryPolicyJson`
+  - Payload: `ArgumentsJson`, `Error`, `CorrelationId`
+  - Timeout: `Timeout` property
+  - Cleanup tracking: `ChannelsCleaned` flag
+
+- [ ] **JobHistoryEntity.cs** - Execution history (one record per retry attempt)
+  - Fields: `Id`, `JobId`, `AttemptNumber`, `WorkerId`, `StartedAt`, `CompletedAt`, `Status`, `Error`, `Duration`
+
+- [ ] **CronScheduleEntity.cs** - Cron-based recurring schedules
+  - Fields: `Id`, `Name`, `CronExpression`, `JobType`, `Queue`, `ArgumentsJson`, `NextRunTime`, `LastRunTime`, `IsEnabled`, `TimeZone`
+
+- [ ] **IntervalScheduleEntity.cs** - Interval-based recurring schedules
+  - Fields: `Id`, `Name`, `Interval`, `JobType`, `Queue`, `ArgumentsJson`, `NextRunTime`, `LastRunTime`, `IsEnabled`
+
+- [ ] **WorkerEntity.cs** - Worker registration and health tracking
+  - Fields: `WorkerId`, `Queues[]`, `MaxConcurrency`, `CurrentLoad`, `LastHeartbeat`, `Status`, `Metadata`
+
+- [ ] **CoordinatorNodeEntity.cs** - Coordinator cluster node tracking
+  - Fields: `NodeId`, `Role` (Leader/Follower), `JobCount`, `LastHeartbeat`, `Status`, `Metadata`
+
+- [ ] **LogEntry.cs** - Job execution logs
+  - Fields: `Id`, `JobId`, `Timestamp`, `Level`, `Message`, `Exception`
+
+- [ ] **DeadLetterEntity.cs** - Failed jobs after max retries
+  - Fields: `Id`, `OriginalJobId`, `JobType`, `Queue`, `ArgumentsJson`, `LastError`, `TotalAttempts`, `FailedAt`
+
+### 1.3 Store Interfaces Implementation
+
+- [ ] **IJobStore.cs**
+  - Basic CRUD: `GetByIdAsync`, `CreateAsync`, `UpdateAsync`
+  - Follower queries: `GetByFollowerAsync`, `GetCountByFollowerAsync`, `ClearFollowerAsync`
+  - Scheduling queries: `GetPendingAsync`, `GetScheduledAsync`
+  - Cleanup queries: `GetForCleanupAsync`, `MarkChannelsCleanedAsync`
+
+- [ ] **IJobHistoryStore.cs**
+  - Methods: `CreateAsync`, `GetByJobIdAsync`
+
+- [ ] **ICronScheduleStore.cs**
+  - CRUD methods
+  - Query: `GetDueSchedulesAsync` (NextRunTime <= now AND IsEnabled = true)
+
+- [ ] **IIntervalScheduleStore.cs**
+  - CRUD methods
+  - Query: `GetDueSchedulesAsync`
+
+- [ ] **IWorkerStore.cs**
+  - Methods: `GetByIdAsync`, `UpsertAsync`, `DeleteAsync`
+  - Queries: `GetActiveWorkersAsync`, `GetByQueueAsync`
+
+- [ ] **ICoordinatorNodeStore.cs**
+  - Methods: `GetByIdAsync`, `UpsertAsync`, `DeleteAsync`
+  - Queries: `GetActiveNodesAsync`, `GetDeadNodesAsync` (LastHeartbeat > timeout)
+
+- [ ] **ILogStore.cs**
+  - Methods: `AppendAsync`, `GetByJobIdAsync`
+
+- [ ] **IDeadLetterStore.cs**
+  - Methods: `CreateAsync`, `GetAllAsync`, `GetByIdAsync`
+
+### 1.4 Verification
+
+- [ ] Build project: `dotnet build`
+- [ ] Verify 0 warnings, 0 errors
+
+---
+
+## Stage 2: Communication Abstractions
+
+> **Goal**: Define channels and messages for external communication
+> 
+> **Project**: `Orchestrix.Coordinator.Abstractions`
+> 
+> **Folder**: `Orchestrix/Coordinator/Communication/`
+> 
+> **Files**: ~4 (channel helpers + message classes)
+> 
+> **Purpose**: Define communication contracts for:
+> - Coordinator ↔ Coordinator (cluster coordination)
+> - **Note**: Job events are shared across Worker, Coordinator, and Control Panel (already defined in `Orchestrix.Transport.Abstractions`)
+> - **Note**: Admin/Control Panel communication will be designed later
+
+### 2.1 Channel Helpers
+
+- [ ] **CoordinatorChannels.cs** - Channel name builder (follows TransportChannels pattern)
   ```csharp
-  public class JobEntity
+  public class CoordinatorChannels
   {
-      public Guid Id { get; set; }
-      public required string JobType { get; set; }
-      public required string Queue { get; set; }
-      public JobStatus Status { get; set; }
-      public JobPriority Priority { get; set; }
-      public string? ArgumentsJson { get; set; }
-      public string? FollowerNodeId { get; set; }
-      public string? WorkerId { get; set; }
-      public int RetryCount { get; set; }
-      public int MaxRetries { get; set; }
-      public string? RetryPolicyJson { get; set; }
-      public string? Error { get; set; }
-      public string? CorrelationId { get; set; }
-      public DateTimeOffset CreatedAt { get; set; }
-      public DateTimeOffset? ScheduledAt { get; set; }
-      public DateTimeOffset? DispatchedAt { get; set; }
-      public DateTimeOffset? StartedAt { get; set; }
-      public DateTimeOffset? CompletedAt { get; set; }
-      public TimeSpan? Timeout { get; set; }
-      public bool ChannelsCleaned { get; set; } = false; // For cleanup tracking
-  }
-  ```
-- [ ] `JobHistoryEntity.cs`
-- [ ] `CronScheduleEntity.cs`
-- [ ] `IntervalScheduleEntity.cs`
-- [ ] `WorkerEntity.cs`
-- [ ] `CoordinatorNodeEntity.cs`
-- [ ] `LogEntry.cs`
-- [ ] `DeadLetterEntity.cs` - Jobs failed after max retries
-
-### Store Interfaces
-- [ ] `IJobStore.cs`
-  ```csharp
-  public interface IJobStore
-  {
-      Task<JobEntity?> GetByIdAsync(Guid id, CancellationToken ct = default);
-      Task<JobEntity> CreateAsync(JobEntity entity, CancellationToken ct = default);
-      Task UpdateAsync(JobEntity entity, CancellationToken ct = default);
+      private readonly string _prefix;
       
-      // Follower queries
-      Task<IReadOnlyList<JobEntity>> GetByFollowerAsync(string followerNodeId, CancellationToken ct = default);
-      Task<int> GetCountByFollowerAsync(string followerNodeId, CancellationToken ct = default);
-      Task ClearFollowerAsync(string followerNodeId, CancellationToken ct = default);
+      // Constructor accepting TransportOptions (reuse existing options)
+      public CoordinatorChannels(TransportOptions options)
+      {
+          _prefix = options.ChannelPrefix;
+      }
       
-      // Status queries
-      Task<IReadOnlyList<JobEntity>> GetPendingAsync(int limit, CancellationToken ct = default);
-      Task<IReadOnlyList<JobEntity>> GetScheduledAsync(DateTimeOffset beforeTime, int limit, CancellationToken ct = default);
+      // Constructor with custom prefix
+      public CoordinatorChannels(string prefix = "orchestrix")
+      {
+          _prefix = prefix;
+      }
       
-      // Cleanup queries
-      Task<IReadOnlyList<JobEntity>> GetForCleanupAsync(
-          DateTimeOffset completedBefore, 
-          int limit, 
-          CancellationToken ct = default);
-      Task MarkChannelsCleanedAsync(Guid jobId, CancellationToken ct = default);
-  }
-  ```
-- [ ] `IJobHistoryStore.cs`
-- [ ] `ICronScheduleStore.cs`
-- [ ] `IIntervalScheduleStore.cs`
-- [ ] `IWorkerStore.cs`
-- [ ] `ICoordinatorNodeStore.cs`
-- [ ] `ILogStore.cs`
-- [ ] `IDeadLetterStore.cs`
-
-**Files: 16**
-
----
-
-## 4.2 Coordinator - Core
-
-### Usage Example
-```csharp
-// Registration (in Orchestrix.Coordinator)
-services.AddOrchestrixCoordinator(options =>
-{
-    options.NodeId = "coordinator-1";
-})
-.UseRedisTransport(redis => redis.ConnectionString = "localhost:6379")  // from Transport.Redis
-.UseEfCorePersistence(ef => ef.UseSqlServer("..."))                     // from Persistence.EfCore  
-.UseRedisLocking(redis => redis.ConnectionString = "localhost:6379");   // from Locking.Redis
-```
-
-### Files
-- [ ] `CoordinatorBuilder.cs` - Implementation of `ICoordinatorBuilder`
-- [ ] `CoordinatorClusterOptions.cs`
-- [ ] `ICoordinatorService.cs` / `CoordinatorService.cs`
-- [ ] `ServiceCollectionExtensions.cs`
-  ```csharp
-  public static ICoordinatorBuilder AddOrchestrixCoordinator(
-      this IServiceCollection services,
-      Action<CoordinatorOptions>? configure = null)
-  {
-      var options = new CoordinatorOptions();
-      configure?.Invoke(options);
-      services.AddSingleton(options);
-      // Register core services...
-      return new CoordinatorBuilder(services);
+      // Coordinator cluster channels
+      public string CoordinatorMetrics => $"{_prefix}:coordinator:metrics";
+      public string JobHandoff => $"{_prefix}:job:handoff";
+      public string JobHandoffAck(string nodeId) => $"{_prefix}:job:handoff:ack:{nodeId}";
+      
+      // Job dispatched event (broadcast to followers)
+      public string JobDispatched => $"{_prefix}:job:dispatched";
   }
   ```
 
-**Files: 4**
+**Note**: Job channels (`job.dispatch`, `job.{id}.status`, `job.{id}.logs`) and Worker channels (`worker.join`, `worker.{id}.metrics`) are already defined in `TransportChannels` and shared across all components.
+
+### 2.2 Coordinator Cluster Messages
+
+**Folder**: `Communication/Cluster/`
+
+- [ ] **NodeMetricsMessage.cs**
+  - Properties: 
+    - `NodeId`, `Role`, `Timestamp`
+    - **Metrics**: `JobCount`, `PendingJobs`, `RunningJobs`, `CompletedJobs`, `FailedJobs`, `JobsPerSecond`
+  - Published to: `{prefix}.coordinator.metrics` (Queue with **Consumer Groups**)
+  - **Consumer Groups**:
+    - `coordinator-leader` - Leader consumes to update node metrics in DB (for dead node detection)
+    - `admin-ui` - Control Panel consumes to push realtime metrics to FE
+  - Purpose: Node metrics + health monitoring (replaces separate heartbeat)
+
+- [ ] **JobDispatchedEvent.cs**
+  - Properties: `JobId`, `Queue`, `JobType`, `Timestamp`
+  - Published to: `{prefix}.job.dispatched` (Topic - **Broadcast** to all followers)
+  - **Purpose**: Notify all followers that a job was dispatched
+  - **Ownership Pattern** (Race to claim):
+    1. Leader dispatches job → publishes to `job.dispatch.{queue}` (for workers)
+    2. Leader broadcasts `JobDispatchedEvent` to `job.dispatched` (for followers)
+    3. **All followers receive** the event
+    4. Followers **race to claim ownership**: first to successfully update DB wins
+       - `UPDATE Jobs SET FollowerNodeId = @nodeId WHERE Id = @jobId AND FollowerNodeId IS NULL`
+    5. Winner subscribes to `job.{jobId}.status` and `job.{jobId}.logs`
+    6. Losers ignore (already claimed)
+
+- [ ] **JobHandoffMessage.cs**
+  - Properties: `JobId`, `FromNodeId`, `Reason` (Drain/Crash), `Timestamp`
+  - Published to: `{prefix}.job.handoff` (Queue with Consumer Group - competing consumers)
+  - Purpose: Reassign job ownership during scale down or crash recovery
+
+- [ ] **JobHandoffAckMessage.cs**
+  - Properties: `JobId`, `NewOwnerNodeId`, `Timestamp`
+  - Published to: `{prefix}.job.handoff.ack.{originalNodeId}` (Topic - point-to-point)
+  - Purpose: Acknowledge job handoff completion
+
+**Note**: Removed `LoadInfoMessage`, `RebalanceRequestMessage`, `RebalanceResponseMessage` - these are handled through job handoff mechanism instead.
+
+### Shared Channels (from Transport.Abstractions)
+
+**Job and Worker channels are already defined in `Orchestrix.Transport.Abstractions`** - no need to redefine here.
+
+**Follower Coordination Pattern (Broadcast + Race to Claim):**
+1. Leader dispatches job → broadcasts `JobDispatchedEvent` to `job.dispatched` (Topic)
+2. **All followers receive** the event
+3. Followers **race to claim ownership** via DB update:
+   - `UPDATE Jobs SET FollowerNodeId = @nodeId WHERE Id = @jobId AND FollowerNodeId IS NULL`
+4. First follower to succeed becomes owner
+5. Owner subscribes to `job.{jobId}.status` and `job.{jobId}.logs`
+6. Owner has full context of job lifecycle
+
+### Implementation Notes
+
+- **Configurable prefix** allows multiple Orchestrix instances on same transport
+- **Control Panel queries data directly** from storage (via `Persistence.Abstractions`)
+- **Channels are for realtime updates only** - no request/reply for queries
+- **Job events are shared** - no duplication across components
+
+### Verification
+
+- [ ] Verify channel names use configurable prefix
+- [ ] Verify all message classes have required properties
+- [ ] Verify messages are serializable (no complex types)
+- [ ] Verify job events are reused from `Orchestrix.Abstractions`
 
 ---
 
-## 4.3 Coordinator - Caching/
+## Stage 3: Core Services & Options
 
-> Use `IDistributedCache` (.NET built-in) to cache hot data.
+> **Goal**: Setup basic coordinator structure and DI registration
+> 
+> **Projects**: `Orchestrix.Coordinator.Abstractions` + `Orchestrix.Coordinator`
+> 
+> **Files**: 6
 
-### Cache Keys
-```csharp
-public static class CacheKeys
-{
-    public static string Job(Guid jobId) => $"orchestrix:job:{jobId}";
-    public static string JobsByFollower(string nodeId) => $"orchestrix:jobs:follower:{nodeId}";
-    public static string Worker(string workerId) => $"orchestrix:worker:{workerId}";
-    public static string Workers() => "orchestrix:workers";
-    public static string CoordinatorNode(string nodeId) => $"orchestrix:coordinator:{nodeId}";
-    public static string CoordinatorNodes() => "orchestrix:coordinators";
-}
-```
+### 3.1 Abstractions Project
 
-### Files
-- [ ] `CacheKeys.cs` - Cache key constants
-- [ ] `CacheOptions.cs`
-  ```csharp
-  public class CacheOptions
-  {
-      public TimeSpan JobCacheTtl { get; set; } = TimeSpan.FromMinutes(5);
-      public TimeSpan WorkerCacheTtl { get; set; } = TimeSpan.FromSeconds(30);
-      public TimeSpan NodeCacheTtl { get; set; } = TimeSpan.FromSeconds(30);
-  }
-  ```
-- [ ] `ICacheService.cs` / `CacheService.cs` - Wrapper over IDistributedCache
+- [ ] Create `Orchestrix.Coordinator.Abstractions` project
+  - Target: `netstandard2.1`
+  - Reference: `Orchestrix.Abstractions`
 
-### Local In-Memory Cache (per Follower)
-```csharp
-// Each Follower tracks owned jobs in local memory (not via Redis)
-ConcurrentDictionary<Guid, JobInfo> _ownedJobs;
-// Sync with DB on startup, update on claim/release
-```
+- [ ] **CoordinatorOptions.cs** - Configuration class
+  - Properties: `NodeId`, `HeartbeatInterval`, `LeaderLeaseDuration`, `LeaderRenewInterval`
 
-**Files: 3**
+- [ ] **ICoordinatorBuilder.cs** - Fluent builder interface
+  - Property: `IServiceCollection Services { get; }`
 
----
+### 3.2 Core Implementation
 
-## 4.4 Coordinator - LeaderElection/
+- [ ] Create `Orchestrix.Coordinator` project
+  - Target: `netstandard2.1`
+  - References: `Coordinator.Abstractions`, `Persistence.Abstractions`, `Transport.Abstractions`, `Locking.Abstractions`
 
-- [ ] `ILeaderElection.cs`
-- [ ] `LeaderElection.cs`
-- [ ] `LeaderElectionOptions.cs`
+- [ ] **CoordinatorBuilder.cs**
+  - Implement `ICoordinatorBuilder`
 
----
+- [ ] **CoordinatorClusterOptions.cs**
+  - Cluster-specific configuration
 
-## 4.5 Coordinator - Coordination/
+- [ ] **ICoordinatorService.cs** / **CoordinatorService.cs**
+  - Implement `IHostedService`
+  - Orchestrate all sub-services (leader election, background services)
+  - `StartAsync`: Initialize leader election + start all background services
+  - `StopAsync`: Graceful shutdown
 
-- [ ] `ICoordinatorCoordinator.cs`
-- [ ] `CoordinatorCoordinator.cs`
-- [ ] `CoordinatorCoordinatorOptions.cs`
+- [ ] **ServiceCollectionExtensions.cs** (namespace: `Microsoft.Extensions.DependencyInjection`)
+  - Method: `AddOrchestrixCoordinator(Action<CoordinatorOptions>)` → returns `ICoordinatorBuilder`
+  - Register all services: `CoordinatorService`, background services, handlers
+
+### 3.3 Verification
+
+- [ ] Build both projects successfully
+- [ ] Verify DI registration works
 
 ---
 
-## 4.6 Coordinator - Scheduling/
+## Stage 4: Caching Layer
 
-- [ ] `IScheduler.cs`
-- [ ] `CronExpressionParser.cs` (uses Cronos)
-- [ ] `ScheduleEvaluator.cs`
-- [ ] `ScheduleScanner.cs` : BackgroundService
-- [ ] `JobPlanner.cs`
+> **Goal**: Implement distributed caching for hot data
+> 
+> **Folder**: `Orchestrix.Coordinator/Caching/`
+> 
+> **Files**: 3
 
----
+### Implementation
 
-## 4.7 Coordinator - Dispatching/
+- [ ] **CacheKeys.cs** - Cache key generation helpers
+  - Static methods: `Job(jobId)`, `Worker(workerId)`, `Workers()`, `CoordinatorNode(nodeId)`, `CoordinatorNodes()`
+  - Format pattern: `"orchestrix:{entity}:{id}"`
 
-- [ ] `IJobDispatcher.cs`
-- [ ] `JobDispatcher.cs`
+- [ ] **CacheOptions.cs** - TTL configuration
+  - Properties: `JobCacheTtl`, `WorkerCacheTtl`, `NodeCacheTtl`
 
----
+- [ ] **ICacheService.cs** / **CacheService.cs** - Cache wrapper
+  - Wrap `IDistributedCache` (.NET built-in)
+  - Methods: `GetAsync<T>`, `SetAsync<T>`, `RemoveAsync`
+  - Handle JSON serialization/deserialization internally
 
-## 4.8 Coordinator - RateLimiting/
+### Verification
 
-- [ ] `IRateLimiter.cs`
-- [ ] `RateLimitOptions.cs`
-- [ ] `SlidingWindowRateLimiter.cs`
-
----
-
-## 4.9 Coordinator - Handlers/
-
-- [ ] `JobEnqueueHandler.cs`
-- [ ] `WorkerHeartbeatHandler.cs`
-- [ ] `JobTimeoutMonitor.cs` : BackgroundService
+- [ ] Test cache Get/Set operations
+- [ ] Verify TTL expiration behavior
 
 ---
 
-## 4.10 Coordinator - Ownership/ (Follower Coordination)
+## Stage 4: Leader Election
 
-### Load Balancing Strategy
-Ensure jobs are distributed evenly across Follower nodes:
+> **Goal**: Implement distributed leader election
+> 
+> **Folder**: `Orchestrix.Coordinator/LeaderElection/`
+> 
+> **Files**: 3
+> 
+> **Complexity**: **HIGH** - Critical for cluster coordination
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    FOLLOWER LOAD BALANCING                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  1. Consumer Group (Built-in)                                       │
-│     • Redis Streams Consumer Group auto round-robin                 │
-│     • Each job.assigned message goes to only 1 follower             │
-│                                                                     │
-│  2. Load Tracking                                                   │
-│     • Each node tracks number of owned jobs                         │
-│     • Publish load info in heartbeat                                │
-│                                                                     │
-│  3. Rebalancing (Optional)                                          │
-│     • If imbalance detected (node A: 100 jobs, node B: 10 jobs)     │
-│     • Overloaded node can handoff some jobs                         │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+### Implementation
 
-### Files
-- [ ] `IJobOwnershipRegistry.cs`
-- [ ] `JobOwnershipRegistry.cs` - Track owned jobs per node
-- [ ] `JobLoadInfo.cs` - Load info (jobCount, lastUpdated)
-- [ ] `JobAssignmentPublisher.cs` - Uses `JobAssignedMessage` from Transport
-- [ ] `JobAssignmentSubscriber.cs` : BackgroundService (uses Consumer Group)
-- [ ] `JobEventProcessor.cs`
-- [ ] `JobOwnershipCleanup.cs`
-- [ ] `JobLoadBalancer.cs` - Monitor load, trigger rebalance if needed
+- [ ] **LeaderElectionOptions.cs**
+  - Properties: `LeaseDuration`, `RenewInterval`, `RetryInterval`
 
----
+- [ ] **ILeaderElection.cs**
+  - Property: `bool IsLeader { get; }`
+  - Methods: `StartAsync`, `StopAsync`
 
-## 4.11 Coordinator - Clustering/ (Scale Down & Handoff)
+- [ ] **LeaderElection.cs** - Core election logic
+  - Use `IDistributedLockProvider` to acquire lock `orchestrix:coordinator:leader`
+  - Election algorithm:
+    1. Attempt to acquire lock with TTL = LeaseDuration
+    2. If successful → set `IsLeader = true`
+    3. Background task renews lock every RenewInterval
+    4. If renewal fails → set `IsLeader = false`, retry acquisition
+  - Handle failover automatically
 
-- [ ] `CoordinatorNodeInfo.cs`
-- [ ] `ICoordinatorNodeRegistry.cs` / `CoordinatorNodeRegistry.cs`
-- [ ] `CoordinatorHeartbeatService.cs` : BackgroundService
-- [ ] `CoordinatorHealthMonitor.cs` : BackgroundService
-- [ ] `CoordinatorDrainService.cs`
-- [ ] `JobHandoffPublisher.cs` - Uses `JobHandoffMessage` from Transport
-- [ ] `JobHandoffSubscriber.cs` : BackgroundService
-- [ ] `JobHandoffAckListener.cs` - Uses `JobHandoffAckMessage` from Transport
-- [ ] `OrphanJobDetector.cs` : BackgroundService
+### Verification
+
+- [ ] Single node test → should become leader
+- [ ] Multi-node test → only one becomes leader
+- [ ] Failover test: kill leader → another node takes over within lease duration
 
 ---
 
-## 4.12 Coordinator - ChannelCleanup/
+## Stage 5: Scheduling
 
-> When job completes (success/fail), **Leader (Master)** scans DB to cleanup channels.
-> **Only Leader runs cleanup** to avoid race condition between nodes.
-> Cleanup status is tracked in DB (`ChannelsCleaned` flag in `JobEntity`).
+> **Goal**: Scan and evaluate schedules, create jobs
+> 
+> **Folder**: `Orchestrix.Coordinator/Scheduling/`
+> 
+> **Files**: 5
+> 
+> **Complexity**: **HIGH** - Core scheduling logic
 
-### Flow
-```
-Job Complete/Failed
-       ↓
-   [Follower] Update job status → Completed/Failed
-       ↓
-   [Leader] ChannelCleanupScanner (BackgroundService)
-       ↓
-   Scan DB: SELECT jobs WHERE 
-     Status IN (Completed, Failed) 
-     AND ChannelsCleaned = false
-     AND CompletedAt < NOW() - CleanupDelay
-       ↓
-   For each job:
-     1. CloseChannelAsync(Job.Status(jobId))
-     2. CloseChannelAsync(Job.Logs(jobId))
-     3. UPDATE job SET ChannelsCleaned = true
-```
+### Implementation
 
-### JobEntity Extension
-```csharp
-public class JobEntity
-{
-    // ... existing fields ...
-    public bool ChannelsCleaned { get; set; } = false;
-}
-```
+- [ ] **IScheduler.cs** - Scheduling interface
 
-### Files
-- [ ] `ChannelCleanupScanner.cs` : BackgroundService (Leader only)
-  ```csharp
-  // Scan DB periodically (e.g., every 10s)
-  // Find completed jobs where ChannelsCleaned = false
-  // AND CompletedAt + CleanupDelay < now
-  // Cleanup and mark ChannelsCleaned = true
-  ```
-- [ ] `ChannelCleanupOptions.cs`
-  ```csharp
-  public class ChannelCleanupOptions
-  {
-      public TimeSpan CleanupDelay { get; set; } = TimeSpan.FromSeconds(30);
-      public TimeSpan ScanInterval { get; set; } = TimeSpan.FromSeconds(10);
-      public int BatchSize { get; set; } = 100;
-  }
-  ```
+- [ ] **CronExpressionParser.cs** - Cron parsing utility
+  - Use `Cronos` NuGet package
+  - Method: `GetNextOccurrence(cronExpression, from)` → DateTimeOffset
+
+- [ ] **ScheduleEvaluator.cs** - Schedule evaluation logic
+  - Determine if schedule is due
+  - Handle timezone conversions
+
+- [ ] **ScheduleScanner.cs** - Background service (Leader only)
+  - Check `ILeaderElection.IsLeader` before processing
+  - Run every 10 seconds
+  - Process flow:
+    1. Query cron/interval schedules where `NextRunTime <= NOW` AND `IsEnabled = true`
+    2. For each due schedule: create JobEntity, dispatch, update NextRunTime
+  - Separate methods: `ScanCronSchedulesAsync`, `ScanIntervalSchedulesAsync`
+
+- [ ] **JobPlanner.cs** - Job creation from schedules
+  - Method: `PlanJobAsync(schedule)` → create job entity, save to DB, dispatch
+
+### Verification
+
+- [ ] Create cron schedule `"*/1 * * * *"` → verify job created every minute
+- [ ] Create interval schedule (30s) → verify job created every 30 seconds
+- [ ] Verify timezone handling works correctly
 
 ---
 
-## Unit Tests
+## Stage 6: Dispatching
 
-- [ ] `LeaderElectionTests.cs`
-  - Election process
-  - Failover when leader dies
-  - Lock renewal
-- [ ] `JobDispatcherTests.cs`
-  - Dispatch to correct queue
-  - Retry handling
-- [ ] `JobStateMachineTests.cs`
-  - State transitions: Pending → Running → Completed/Failed
-- [ ] `ScheduleScannerTests.cs`
-  - Cron parsing and next run calculation
-  - Interval schedules
-- [ ] `WorkerRegistryTests.cs`
-  - Worker registration and heartbeat
-- [ ] `RateLimiterTests.cs`
-  - Sliding window logic
+> **Goal**: Dispatch jobs to workers via transport
+> 
+> **Folder**: `Orchestrix.Coordinator/Dispatching/`
+> 
+> **Files**: 2
 
----
+### Implementation
 
-## Summary
-| Section | Files |
-|:--------|:------|
-| Persistence.Abstractions | 16 |
-| Core | 4 |
-| Caching | 3 |
-| LeaderElection | 3 |
-| Coordination | 3 |
-| Scheduling | 5 |
-| Dispatching | 2 |
-| RateLimiting | 3 |
-| Handlers | 3 |
-| Ownership | 8 |
-| Clustering | 8 |
-| ChannelCleanup | 2 |
-| Unit Tests | 6 |
-| **Total** | **~66** |
+- [ ] **IJobDispatcher.cs**
+  - Method: `DispatchAsync(JobEntity job)`
+
+- [ ] **JobDispatcher.cs** - Dispatch implementation
+  - Dispatch flow:
+    1. Publish `JobDispatchMessage` → `job.dispatch.{queue}` channel (for workers)
+    2. Publish `JobAssignedMessage` → `job.assigned` channel (for Follower coordination)
+    3. Update job status → `Dispatched`, set `DispatchedAt` timestamp
+
+### Verification
+
+- [ ] Dispatch job → verify messages published to correct channels
+- [ ] Verify job status updated in database
 
 ---
 
-## Design Notes
+## Stage 7: Rate Limiting
 
-### Transport Abstraction
-Coordinator **does not depend directly on Redis**. All communication goes through:
-- `IPublisher` / `ISubscriber` (Transport.Abstractions)
-- `IDistributedLock` (Locking.Abstractions)
-- `IJobStore` (Coordinator.Persistence.Abstractions) - includes ownership queries
+> **Goal**: Implement sliding window rate limiter
+> 
+> **Folder**: `Orchestrix.Coordinator/RateLimiting/`
+> 
+> **Files**: 3
 
-### Consumer Group Support
-Transport abstraction needs to support competing consumers and channel cleanup:
-```csharp
-public interface ISubscriber
-{
-    // Broadcast - all subscribers receive
-    Task SubscribeAsync<T>(string channel, Func<T, Task> handler, CancellationToken ct);
-    
-    // Competing consumers (only one receives)
-    Task SubscribeCompetingAsync<T>(
-        string channel, 
-        string groupName, 
-        string consumerName,
-        Func<T, Task> handler,
-        CancellationToken ct);
-    
-    Task UnsubscribeAsync(string channel);
-    
-    // Close channel and cleanup resources
-    Task CloseChannelAsync(string channel, CancellationToken ct);
-}
-```
+### Implementation
 
-### Minimum Requirement: Redis
-- Redis is the default and recommended implementation
-- Other transports (RabbitMQ, Kafka) can be implemented later
-- InMemory is for testing only
+- [ ] **IRateLimiter.cs**
+  - Method: `TryAcquireAsync(key, limit, window)` → bool
+
+- [ ] **RateLimitOptions.cs**
+  - Default limits configuration per queue
+
+- [ ] **SlidingWindowRateLimiter.cs** - Rate limiting algorithm
+  - Implementation approach:
+    1. Use `ConcurrentDictionary<string, Queue<DateTimeOffset>>` to track timestamps
+    2. On acquire: remove timestamps outside time window
+    3. Check if count < limit
+    4. If yes: add current timestamp and return true
+
+### Verification
+
+- [ ] Set limit 10 requests/60s → send 10 requests → all succeed
+- [ ] Send 11th request → should fail
+- [ ] Wait 60s → request should succeed again
+
+---
+
+## Stage 8: Event Handlers
+
+> **Goal**: Handle incoming events from workers and clients
+> 
+> **Folder**: `Orchestrix.Coordinator/Handlers/`
+> 
+> **Files**: 3
+
+### Implementation
+
+- [ ] **JobEnqueueHandler.cs** - Background service
+  - Subscribe to `job.enqueue` channel
+  - Processing flow:
+    1. Receive `JobEnqueueMessage`
+    2. Create `JobEntity` in database
+    3. Dispatch via `IJobDispatcher`
+
+- [ ] **WorkerHeartbeatHandler.cs** - Background service
+  - Subscribe to `worker.heartbeat` channel
+  - Processing flow:
+    1. Receive `WorkerHeartbeatMessage`
+    2. Upsert `WorkerEntity` (update LastHeartbeat, CurrentLoad, Status)
+
+- [ ] **JobTimeoutMonitor.cs** - Background service (Leader only)
+  - Run every 10 seconds
+  - Monitoring flow:
+    1. Query running jobs with timeout configured
+    2. If `StartedAt + Timeout < NOW` → mark job as `TimedOut`
+    3. Publish `JobCancelMessage` to `job.{jobId}.cancel` channel
+
+### Verification
+
+- [ ] Enqueue job → verify created in DB and dispatched
+- [ ] Worker sends heartbeat → verify WorkerEntity updated
+- [ ] Job exceeds timeout → verify marked as timed out and cancel message sent
+
+---
+
+## Stage 9: Follower Coordination (Ownership)
+
+> **Goal**: Distribute job event processing across Follower nodes
+> 
+> **Folder**: `Orchestrix.Coordinator/Ownership/`
+> 
+> **Files**: 7
+> 
+> **Complexity**: **HIGH** - Critical for scalability
+
+### Problem & Solution
+
+**Problem**: Global `job.status`/`job.logs` channels with load balancing → events fragmented across nodes → no single node has full job context
+
+**Solution**: Job Assignment Channel → one Follower owns each job and subscribes to job-specific channels
+
+### Implementation
+
+- [ ] **IJobOwnershipRegistry.cs** / **JobOwnershipRegistry.cs**
+  - In-memory tracking using `ConcurrentDictionary<Guid, JobOwnershipInfo>`
+  - Methods: `ClaimAsync(jobId)`, `ReleaseAsync(jobId)`, `GetOwnedJobsAsync()`
+
+- [ ] **JobLoadInfo.cs** - Load tracking model
+  - Properties: `JobCount`, `LastUpdated`
+
+- [ ] **JobAssignmentPublisher.cs**
+  - Publish `JobAssignedMessage` to `job.assigned` channel
+  - Called by `JobDispatcher` after dispatching job
+
+- [ ] **JobAssignmentSubscriber.cs** - Background service
+  - Subscribe to `job.assigned` with **Consumer Group** (competing consumers)
+  - Processing flow when message received:
+    1. Claim ownership in `JobOwnershipRegistry`
+    2. Subscribe to `job.{jobId}.status` channel
+    3. Subscribe to `job.{jobId}.logs` channel
+    4. Update database: set `job.FollowerNodeId = this.NodeId`
+
+- [ ] **JobEventProcessor.cs** - Event processing logic
+  - Process status events: update job status and timestamps in database
+  - Process log events: append to `ILogStore`
+
+- [ ] **JobOwnershipCleanup.cs**
+  - Triggered when job completes
+  - Actions: release ownership, unsubscribe from job-specific channels
+
+- [ ] **JobLoadBalancer.cs** (Optional)
+  - Monitor load distribution across Follower nodes
+  - Trigger rebalancing if imbalance detected (threshold: 2x difference)
+
+### Verification
+
+- [ ] Dispatch job → verify exactly one Follower claims ownership
+- [ ] Worker publishes status → verify correct Follower processes event
+- [ ] Worker publishes logs → verify logs saved to database
+- [ ] Job completes → verify ownership released and channels unsubscribed
+
+---
+
+## Stage 10: Clustering & Scale Down
+
+> **Goal**: Handle graceful shutdown and crash recovery
+> 
+> **Folder**: `Orchestrix.Coordinator/Clustering/`
+> 
+> **Files**: 9
+> 
+> **Complexity**: **VERY HIGH** - Most complex feature
+
+### Scenarios
+
+**Scenario A - Graceful Shutdown (SIGTERM)**:
+1. Set node state to DRAINING
+2. Unsubscribe from `job.assigned` (stop accepting new jobs)
+3. Handoff all owned jobs to other nodes
+4. Wait for acknowledgments with timeout
+5. Shutdown gracefully
+
+**Scenario B - Crash Recovery**:
+1. Detect dead node (no heartbeat > 30s)
+2. Leader queries orphaned jobs (jobs owned by dead node)
+3. Re-publish orphaned jobs to `job.handoff` channel for reassignment
+
+### Implementation
+
+- [ ] **CoordinatorNodeInfo.cs** - Node information model
+  - Properties: `NodeId`, `Role`, `JobCount`, `LastHeartbeat`, `Status`
+
+- [ ] **ICoordinatorNodeRegistry.cs** / **CoordinatorNodeRegistry.cs**
+  - Track active coordinator nodes
+  - Detect and mark dead nodes
+
+- [ ] **CoordinatorHeartbeatService.cs** - Background service
+  - Publish heartbeat every 10 seconds to `coordinator.heartbeat` channel
+  - Include: `NodeId`, `JobCount`, `Timestamp`
+
+- [ ] **CoordinatorHealthMonitor.cs** - Background service
+  - Subscribe to `coordinator.heartbeat` channel
+  - Track last heartbeat timestamp per node
+  - Mark node as DEAD if no heartbeat received for > 30 seconds
+
+- [ ] **CoordinatorDrainService.cs** - Graceful shutdown handler
+  - Handle SIGTERM signal
+  - Drain flow:
+    1. Unsubscribe from `job.assigned` channel
+    2. Retrieve owned jobs from `JobOwnershipRegistry`
+    3. For each job: call `JobHandoffPublisher.HandoffAsync`
+    4. Wait for acknowledgments (with timeout)
+    5. Proceed with shutdown
+
+- [ ] **JobHandoffPublisher.cs** - Handoff coordination
+  - Publish `JobHandoffMessage` to `job.handoff` channel
+  - Wait for ACK with timeout (5s), retry up to 3 times
+  - Track pending ACKs using `ConcurrentDictionary<Guid, TaskCompletionSource<bool>>`
+  - Method: `HandoffAsync(jobId, reason)` → returns bool (success/failure)
+
+- [ ] **JobHandoffSubscriber.cs** - Background service
+  - Subscribe to `job.handoff` channel with Consumer Group (competing consumers)
+  - Processing flow when message received:
+    1. Claim ownership of handed-off job
+    2. Subscribe to job-specific channels
+    3. Update database: set `job.FollowerNodeId` to this node
+    4. Send ACK to `job.handoff.ack.{originalNodeId}` channel
+
+- [ ] **JobHandoffAckListener.cs** - ACK receiver
+  - Subscribe to `job.handoff.ack.{nodeId}` channel (own node ID)
+  - Receive acknowledgments and notify `JobHandoffPublisher`
+
+- [ ] **OrphanJobDetector.cs** - Background service (Leader only)
+  - Run every 30 seconds
+  - Detection flow:
+    1. Retrieve dead nodes from `CoordinatorNodeRegistry`
+    2. Query jobs where `FollowerNodeId = deadNode.NodeId` AND `Status = Running`
+    3. For each orphaned job: re-publish to `job.handoff` channel for reassignment
+
+### Verification
+
+- [ ] Graceful shutdown: Send SIGTERM → verify jobs handed off → verify ACKs received → verify clean shutdown
+- [ ] Crash recovery: Kill node forcefully → verify orphans detected within 30s → verify jobs reassigned
+- [ ] All nodes dead scenario: Verify hard timeout triggers → force shutdown
+
+---
+
+## Stage 11: Channel Cleanup
+
+> **Goal**: Cleanup job-specific channels after job completion
+> 
+> **Folder**: `Orchestrix.Coordinator/ChannelCleanup/`
+> 
+> **Files**: 2
+
+### Implementation
+
+- [ ] **ChannelCleanupOptions.cs**
+  - Properties: `CleanupDelay` (default: 30s), `ScanInterval` (default: 10s), `BatchSize` (default: 100)
+
+- [ ] **ChannelCleanupScanner.cs** - Background service (Leader only)
+  - Run every `ScanInterval` seconds
+  - Cleanup flow:
+    1. Query: Jobs where Status IN (Completed, Failed) AND ChannelsCleaned = false AND CompletedAt + CleanupDelay < NOW
+    2. For each job in batch:
+       - Close channel `job.{jobId}.status`
+       - Close channel `job.{jobId}.logs`
+       - Update database: set `job.ChannelsCleaned = true`
+
+### Verification
+
+- [ ] Complete job → wait CleanupDelay duration → verify channels closed
+- [ ] Verify `ChannelsCleaned` flag set to true in database
+
+---
+
+## Stage 12: Coordinator-to-Coordinator Communication
+
+> **Goal**: Enable direct communication between Coordinator nodes
+> 
+> **Folder**: `Orchestrix.Coordinator/Coordination/`
+> 
+> **Files**: 3
+
+### Implementation
+
+- [ ] **ICoordinatorCoordinator.cs**
+  - Methods: `SendToNodeAsync(targetNodeId, message)`, `BroadcastAsync(message)`
+
+- [ ] **CoordinatorCoordinator.cs** - Direct messaging implementation
+  - Implement point-to-point and broadcast messaging between coordinators
+  - Use channels: `coordinator.{nodeId}.messages` (point-to-point), `coordinator.broadcast` (broadcast)
+
+- [ ] **CoordinatorCoordinatorOptions.cs**
+  - Communication configuration settings
+
+### Verification
+
+- [ ] Send message from Coordinator 1 to Coordinator 2 → verify received
+- [ ] Broadcast message → verify all nodes receive
+
+---
+
+## Implementation Summary
+
+| Stage | Files | Complexity | Priority | Dependencies |
+|:------|:------|:-----------|:---------|:-------------|
+| 1. Persistence Abstractions | 16 | Medium | **Critical** | None |
+| 2. Communication Abstractions | 4 | Low | **Critical** | None |
+| 3. Core Services | 6 | Low | **Critical** | Stages 1, 2 |
+| 4. Caching | 3 | Low | High | Stage 3 |
+| 5. Leader Election | 3 | **High** | **Critical** | Stage 3, Locking |
+| 6. Scheduling | 5 | **High** | **Critical** | Stages 3, 4, 5 |
+| 7. Dispatching | 2 | Medium | **Critical** | Stages 3, 6 |
+| 8. Rate Limiting | 3 | Medium | Medium | Stage 3 |
+| 9. Event Handlers | 3 | Medium | **Critical** | Stages 3, 7 |
+| 10. Follower Coordination | 7 | **High** | **Critical** | Stages 3, 7, 9 |
+| 11. Clustering & Scale Down | 9 | **Very High** | **Critical** | Stages 3, 5, 10 |
+| 12. Channel Cleanup | 2 | Low | High | Stages 3, 5 |
+| 13. Coordinator Communication | 3 | Medium | Low | Stage 3 |
+
+**Total**: ~66 files
+
+---
+
+## Recommended Implementation Order
+
+**Phase 1 - Foundation** (Stages 1-3):
+- Essential infrastructure and abstractions
+- Low risk, straightforward implementation
+
+**Phase 2 - Core Functionality** (Stages 4-6):
+- Leader election, scheduling, dispatching
+- High complexity but critical for basic operation
+
+**Phase 3 - Event Processing** (Stages 7-9):
+- Rate limiting, event handlers, follower coordination
+- Enables distributed event processing
+
+**Phase 4 - Production Readiness** (Stages 10-12):
+- Clustering, cleanup, inter-coordinator communication
+- Required for production deployment
+
+**Critical Path**: Stages 1, 2, 4, 5, 6, 8, 9, 10 are mandatory for core functionality.
+
+**Can Defer**: Stages 3, 7, 11, 12 can be implemented later or skipped for MVP.

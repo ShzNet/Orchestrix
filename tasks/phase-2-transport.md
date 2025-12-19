@@ -79,14 +79,22 @@ src/Transport/Orchestrix.Transport.Abstractions/
   }
   ```
 
-- [x] `ISubscriber.cs` - Simplified with auto-unsubscribe
+- [x] `ISubscriber.cs` - Simplified with auto-unsubscribe + consumer groups
   ```csharp
   public interface ISubscriber
   {
-      // Handler returns true to continue, false to auto-unsubscribe
+      // Topic pattern - all subscribers receive message
       Task SubscribeAsync<T>(
           string channel, 
           Func<T, Task<bool>> handler, 
+          CancellationToken ct = default);
+      
+      // Consumer group pattern - only one consumer in group receives message
+      Task SubscribeWithGroupAsync<T>(
+          string channel,
+          string groupName,
+          string consumerName,
+          Func<T, Task<bool>> handler,
           CancellationToken ct = default);
       
       Task UnsubscribeAsync(string channel);
@@ -191,8 +199,11 @@ src/Transport/Orchestrix.Transport.Abstractions/
   - Use `XADD` for queues (Redis Streams)
   - Use `PUBLISH` for broadcast
 - [ ] `RedisSubscriber.cs`
-  - Use `XREADGROUP` for competing consumers
-  - Use `SUBSCRIBE` for broadcast
+  - **Topic pattern** (`SubscribeAsync`): Use `SUBSCRIBE` for broadcast
+  - **Consumer group pattern** (`SubscribeWithGroupAsync`): Use `XREADGROUP` for competing consumers
+    - Create consumer group if not exists: `XGROUP CREATE`
+    - Read with `XREADGROUP BLOCK` for each consumer
+    - ACK messages with `XACK` after successful processing
 - [ ] `ServiceCollectionExtensions.cs`
 
 **Files: 5**
