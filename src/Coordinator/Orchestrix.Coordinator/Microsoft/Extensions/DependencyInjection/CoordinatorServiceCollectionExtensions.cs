@@ -66,6 +66,9 @@ public static class CoordinatorServiceCollectionExtensions
         // Register queue scanning services
         services.AddHostedService<JobQueueScanner>();
 
+        // Register cache invalidation service
+        services.AddSingleton<Orchestrix.Coordinator.Caching.ICacheInvalidator, Orchestrix.Coordinator.Services.CacheInvalidator>();
+
         // TODO: Register core services (will be added in later stages)
         // - CoordinatorService (IHostedService)
         // - Background services
