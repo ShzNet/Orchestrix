@@ -13,6 +13,7 @@ internal class JobDispatcher(
     IPublisher publisher,
     IJobStore jobStore,
     TransportChannels channels,
+    Orchestrix.Coordinator.Ownership.JobAssignmentPublisher assignmentPublisher,
     ILogger<JobDispatcher> logger)
     : IJobDispatcher
 {
@@ -20,11 +21,14 @@ internal class JobDispatcher(
     {
         try
         {
-            // Publish JobDispatchMessage to job.dispatch.{queue} for workers
+            var executionId = Guid.NewGuid(); // Create new execution ID
+
+            // 1. Publish to job.dispatch.{queue} for WORKERS
+            //    Workers consume with consumer group "workers"
             var dispatchMessage = new JobDispatchMessage
             {
                 JobId = job.Id,
-                ExecutionId = Guid.NewGuid(), // Create new execution ID
+                ExecutionId = executionId,
                 JobType = job.JobType,
                 Arguments = job.ArgumentsJson,
                 RetryCount = job.RetryCount,
@@ -35,16 +39,24 @@ internal class JobDispatcher(
             var dispatchChannel = channels.JobDispatch(job.Queue);
             await publisher.PublishAsync(dispatchChannel, dispatchMessage, cancellationToken);
 
-            // Update job status to Dispatched
+            // 2. Update job status to Dispatched
             await jobStore.MarkDispatchedAsync(
                 job.Id,
                 string.Empty, // WorkerId not known yet
                 DateTimeOffset.UtcNow,
                 cancellationToken);
 
+            // 3. Publish to job.dispatched for FOLLOWERS
+            //    Followers consume with consumer group "followers" to race-to-claim ownership
+            await assignmentPublisher.PublishJobAssignedAsync(
+                job.Id,
+                executionId,
+                job.Queue,
+                cancellationToken);
+
             logger.LogInformation(
                 "Dispatched job {JobId} (execution {ExecutionId}) to queue {Queue}",
-                job.Id, dispatchMessage.ExecutionId, job.Queue);
+                job.Id, executionId, job.Queue);
         }
         catch (Exception ex)
         {

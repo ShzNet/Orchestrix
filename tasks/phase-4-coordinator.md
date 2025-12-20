@@ -30,11 +30,11 @@ This phase implements 12 major components that work together to provide distribu
 **Why**: Enable flexible configuration and DI-based architecture  
 **How**: Implement `IHostedService` that manages lifecycle of all sub-components
 
-### 4. Caching Layer
+### 4. Caching Layer ✅
 **Purpose**: Reduce database load for frequently accessed data  
-**What**: Distributed cache wrapper with key generation helpers  
-**Why**: Improve performance by caching hot data (jobs, workers, nodes)  
-**How**: Wrap `IDistributedCache` with typed methods and automatic serialization
+**What**: Shared cache infrastructure with `CacheKeys`, `CacheDurations`, `ICacheInvalidator`  
+**Why**: Improve performance and ensure cache consistency between Coordinator and Control Panel  
+**How**: Centralized cache key generation, standardized TTL values, coordinated invalidation
 
 ### 5. Leader Election
 **Purpose**: Ensure only one coordinator performs scheduling/monitoring  
@@ -518,13 +518,15 @@ src/Coordinator/
 
 ---
 
-## Stage 10: Follower Coordination (Ownership)
+## Stage 10: Follower Coordination (Ownership) 🔄
 
+> **Status**: 🔄 **IN PROGRESS** (Phase 1 Complete)
+> 
 > **Goal**: Distribute job event processing across Follower nodes
 > 
 > **Folder**: `Orchestrix.Coordinator/Ownership/`
 > 
-> **Files**: 7
+> **Files**: 7 (1 complete, 6 remaining)
 > 
 > **Complexity**: **HIGH** - Critical for scalability
 
@@ -532,20 +534,18 @@ src/Coordinator/
 
 **Problem**: Global `job.status`/`job.logs` channels with load balancing → events fragmented across nodes → no single node has full job context
 
-**Solution**: Job Assignment Channel → one Follower owns each job and subscribes to job-specific channels
+**Solution**: Dual-queue architecture → `job.dispatch.{queue}` for workers + `job.dispatched` for followers → race-to-claim ownership
 
 ### Implementation
 
-- [ ] **IJobOwnershipRegistry.cs** / **JobOwnershipRegistry.cs**
+- [/] **IJobOwnershipRegistry.cs** / **JobOwnershipRegistry.cs** (Already exists)
   - In-memory tracking using `ConcurrentDictionary<Guid, JobOwnershipInfo>`
   - Methods: `ClaimAsync(jobId)`, `ReleaseAsync(jobId)`, `GetOwnedJobsAsync()`
 
-- [ ] **JobLoadInfo.cs** - Load tracking model
-  - Properties: `JobCount`, `LastUpdated`
-
-- [ ] **JobAssignmentPublisher.cs**
-  - Publish `JobAssignedMessage` to `job.assigned` channel
+- [x] **JobAssignmentPublisher.cs** ✅
+  - Publish `JobDispatchedEvent` to `job.dispatched` channel
   - Called by `JobDispatcher` after dispatching job
+  - Includes cache invalidation for job and queue
 
 - [ ] **JobAssignmentSubscriber.cs** - Background service
   - Subscribe to `job.assigned` with **Consumer Group** (competing consumers)
