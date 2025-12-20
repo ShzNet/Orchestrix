@@ -67,7 +67,12 @@ public static class CoordinatorServiceCollectionExtensions
         services.AddHostedService<JobQueueScanner>();
 
         // Register ownership services
+        services.AddSingleton<Orchestrix.Coordinator.Ownership.IJobOwnershipRegistry, Orchestrix.Coordinator.Ownership.JobOwnershipRegistry>();
         services.AddSingleton<Orchestrix.Coordinator.Ownership.JobAssignmentPublisher>();
+        services.AddSingleton<Orchestrix.Coordinator.Ownership.JobOwnershipCleanup>();
+        services.AddSingleton<Orchestrix.Coordinator.Ownership.JobEventProcessor>();
+        services.AddSingleton<Orchestrix.Coordinator.Ownership.JobChannelSubscriber>();
+        services.AddHostedService<Orchestrix.Coordinator.Ownership.JobAssignmentSubscriber>();
 
         // Register cache invalidation service
         services.AddSingleton<Orchestrix.Coordinator.Caching.ICacheInvalidator, Orchestrix.Coordinator.Services.CacheInvalidator>();
