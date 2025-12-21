@@ -518,15 +518,15 @@ src/Coordinator/
 
 ---
 
-## Stage 10: Follower Coordination (Ownership) ✅
+## Stage 10: Follower Coordination (Ownership) 🔲
 
-> **Status**: ✅ **COMPLETE**
+> **Status**: 🔲 **TODO** (Previous implementation removed during refactoring)
 > 
 > **Goal**: Distribute job event processing across Follower nodes
 > 
 > **Folder**: `Orchestrix.Coordinator/Ownership/`
 > 
-> **Files**: 7 (all complete)
+> **Files**: 7
 > 
 > **Complexity**: **HIGH** - Critical for scalability
 
@@ -538,34 +538,34 @@ src/Coordinator/
 
 ### Implementation
 
-- [x] **JobOwnershipInfo.cs** / **IJobOwnershipRegistry.cs** / **JobOwnershipRegistry.cs** ✅
+- [ ] **JobOwnershipInfo.cs** / **IJobOwnershipRegistry.cs** / **JobOwnershipRegistry.cs**
   - In-memory tracking using `ConcurrentDictionary<Guid, JobOwnershipInfo>`
   - Methods: `ClaimAsync()`, `ReleaseAsync()`, `GetOwnedJobsAsync()`, `OwnsJobAsync()`
 
-- [x] **JobAssignmentPublisher.cs** ✅
+- [ ] **JobAssignmentPublisher.cs**
   - Publish `JobDispatchedEvent` to `job.dispatched` channel
   - Called by `JobDispatcher` after dispatching job
   - Includes cache invalidation for job and queue
 
-- [x] **JobAssignmentSubscriber.cs** ✅ - Background service
+- [ ] **JobAssignmentSubscriber.cs** - Background service
   - Subscribe to `job.dispatched` with consumer group "followers"
   - Race-to-claim ownership using `IJobStore.TryClaimJobAsync()`
   - Register ownership in `JobOwnershipRegistry`
   - Invalidate cache after claiming
   - Delegate to `JobChannelSubscriber` for event subscriptions
 
-- [x] **JobChannelSubscriber.cs** ✅ - Channel subscription service
+- [ ] **JobChannelSubscriber.cs** - Channel subscription service
   - Subscribe to `job.{executionId}.status` channel
   - Subscribe to `job.{executionId}.log` channel
   - Delegate events to `JobEventProcessor`
   - Unsubscribe on cleanup
 
-- [x] **JobEventProcessor.cs** ✅ - Event processing logic
+- [ ] **JobEventProcessor.cs** - Event processing logic
   - Process status events: update job status + invalidate cache
   - Process log events: append to `ILogStore`
   - Auto-trigger cleanup on terminal status
 
-- [x] **JobOwnershipCleanup.cs** ✅
+- [ ] **JobOwnershipCleanup.cs**
   - Triggered when job completes (Completed/Failed/Cancelled)
   - Actions: unsubscribe from channels, release ownership
 
@@ -575,9 +575,9 @@ src/Coordinator/
 
 ### Verification
 
-- [x] All components build successfully ✅
-- [x] DI registration complete ✅
-- [x] Cache invalidation integrated ✅
+- [ ] All components build successfully
+- [ ] DI registration complete
+- [ ] Cache invalidation integrated
 - [ ] Integration testing (requires running coordinator + workers)
 - [ ] Verify ownership claiming works correctly
 - [ ] Verify event processing and cleanup
