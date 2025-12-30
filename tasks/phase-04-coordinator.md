@@ -247,9 +247,9 @@ src/Coordinator/
 
 ---
 
-## Stage 3: Core Services & Options ✅
+## Stage 3: Core Services & Options ⚠️
 
-> **Status**: ✅ **COMPLETE**
+> **Status**: ⚠️ **PARTIAL**
 > 
 > **Goal**: Setup basic coordinator structure and DI registration
 > 
@@ -263,11 +263,12 @@ src/Coordinator/
 - [x] **ICoordinatorBuilder.cs** - Fluent builder interface ✅
 - [x] **IPersistenceBuilder.cs** - Persistence configuration interface ✅
 
-### 3.2 Core Implementation ✅
+### 3.2 Core Implementation 🔲
 
-- [x] **CoordinatorBuilder.cs** - Implements ICoordinatorBuilder ✅
-- [x] **Builders.cs** - Internal implementations of TransportBuilder, LockingBuilder, PersistenceBuilder ✅
-- [x] **ServiceCollectionExtensions.cs** - `AddOrchestrixCoordinator()` method ✅
+- [ ] **CoordinatorBuilder.cs** - Implements ICoordinatorBuilder
+- [ ] **ScopedProcessingService.cs** - Base class for scoped background tasks
+- [ ] **Builders.cs** - Internal implementations of TransportBuilder, LockingBuilder, PersistenceBuilder
+- [ ] **ServiceCollectionExtensions.cs** - `AddOrchestrixCoordinator()` method
 
 ### 3.3 Builder Interfaces ✅
 
@@ -280,13 +281,12 @@ src/Coordinator/
 - [x] **Orchestrix.Locking.InMemory** - UseInMemory(ILockingBuilder) ✅
 - [x] Removed LockingOptions ✅
 
-### 3.5 Verification ✅
+### 3.5 Verification 🔲
 
-- [x] Build both projects successfully ✅
-- [x] Verify DI registration works ✅
+- [ ] Build both projects successfully
+- [ ] Verify DI registration works
 
 ---
-
 
 ## Stage 4: Caching Layer ✅
 
@@ -297,6 +297,16 @@ src/Coordinator/
 > **Project**: `Orchestrix.Caching`
 > 
 > **Files**: 1 (extension methods)
+> 
+> ### Architecture Update: Scoped Background Services
+> 
+> To ensure efficient resource management and correct database context handling, we will implement a `ScopedProcessingService` base class.
+> 
+> **Pattern**:
+> 1. Service inherits `ScopedProcessingService`.
+> 2. `ExecuteAsync` creates a new `IServiceScope` for each execution interval.
+> 3. Dependencies (Repositories, etc.) are resolved from this scope.
+> 4. Scope is disposed immediately after execution.
 
 ### Implementation ✅
 
@@ -315,10 +325,9 @@ src/Coordinator/
 
 ---
 
+## Stage 5: Leader Election 🔲
 
-## Stage 5: Leader Election ✅
-
-> **Status**: ✅ **COMPLETE**
+> **Status**: 🔲 **TODO**
 > 
 > **Goal**: Implement distributed leader election
 > 
@@ -328,14 +337,14 @@ src/Coordinator/
 > 
 > **Complexity**: **HIGH** - Critical for cluster coordination
 
-### Implementation ✅
+### Implementation
 
-- [x] **ILeaderElection.cs** ✅
+- [ ] **ILeaderElection.cs**
   - Property: `bool IsLeader { get; }`
   - Event: `LeadershipChanged` for reactive services
   - Methods: `StartAsync`, `StopAsync`
 
-- [x] **LeaderElection.cs** - Core election logic ✅
+- [ ] **LeaderElection.cs** - Core election logic
   - Use `IDistributedLockProvider` to acquire lock `orchestrix:coordinator:leader`
   - Election algorithm:
     1. Attempt to acquire lock with TTL = LeaseDuration
@@ -345,20 +354,20 @@ src/Coordinator/
   - Handle failover automatically
   - Linked cancellation token for proper shutdown
 
-- [x] **LeaderElectionHostedService.cs** - Lifecycle management ✅
+- [ ] **LeaderElectionHostedService.cs** - Lifecycle management
   - Auto start/stop with application
 
-### Verification ✅
+### Verification
 
-- [x] Build successful ✅
-- [x] Proper cancellation handling ✅
-- [x] Event-driven design ✅
+- [ ] Build successful
+- [ ] Proper cancellation handling
+- [ ] Event-driven design
 
 ---
 
-## Stage 6: Scheduling ✅
+## Stage 6: Scheduling 🔲
 
-> **Status**: ✅ **COMPLETE**
+> **Status**: 🔲 **TODO**
 > 
 > **Goal**: Scan and evaluate cron schedules, create jobs
 > 
@@ -368,65 +377,66 @@ src/Coordinator/
 > 
 > **Complexity**: **HIGH** - Core scheduling logic
 
-### Implementation ✅
+### Implementation
 
-- [x] **IScheduler.cs** - Scheduling interface ✅
+- [ ] **IScheduler.cs** - Scheduling interface
   - Method: `ScanCronSchedulesAsync()`
 
-- [x] **CronExpressionParser.cs** - Cron parsing utility ✅
+- [ ] **CronExpressionParser.cs** - Cron parsing utility
   - Use `Cronos` NuGet package (v0.8.4)
   - Method: `GetNextOccurrence(cronExpression, from, timeZone)` → DateTimeOffset?
   - Method: `IsValid(cronExpression)` → bool
   - Timezone-aware parsing
 
-- [x] **ScheduleEvaluator.cs** - Schedule evaluation logic ✅
+- [ ] **ScheduleEvaluator.cs** - Schedule evaluation logic
   - `IsCronScheduleDue()` - checks if schedule is due
   - `CalculateNextCronRunTime()` - calculates next run with timezone support
 
-- [x] **JobPlanner.cs** - Job creation from schedules ✅
+- [ ] **JobPlanner.cs** - Job creation from schedules
   - Method: `PlanJobFromCronScheduleAsync(schedule)` → creates JobEntity
   - Uses `IJobStore.EnqueueAsync()` to save job
   - Updates schedule via `ICronScheduleStore.UpdateNextRunTimeAsync()`
   - Sets `ScheduleId` and `ScheduleType` for traceability
 
-- [x] **ScheduleScanner.cs** - Background service (Leader only) ✅
+- [ ] **ScheduleScanner.cs** - Background service (Leader only)
+  - **Inherits**: `ScopedProcessingService`
   - Checks `ILeaderElection.IsLeader` before processing
   - Runs every 10 seconds
-  - Process flow:
+  - Process flow (Scoped):
     1. Query cron schedules where `NextRunTime <= NOW` AND `IsEnabled = true`
     2. For each due schedule: create JobEntity via JobPlanner
     3. Update schedule's NextRunTime
 
-- [x] **Scheduler.cs** - IScheduler implementation ✅
+- [ ] **Scheduler.cs** - IScheduler implementation
   - Implements `ScanCronSchedulesAsync()`
   - Delegates to JobPlanner for job creation
 
-### Design Decisions ✅
+### Design Decisions
 
 - **Cron-only**: Removed interval schedule concept - cron expressions are sufficient
 - **Leader-only scanning**: Only leader node scans schedules to prevent duplicate job creation
 - **Timezone support**: CronExpressionParser supports timezone-aware scheduling
 - **Schedule traceability**: Added `ScheduleId` and `ScheduleType` to JobEntity for observability
 
-### Entity Changes ✅
+### Entity Changes
 
 - [x] Added `ScheduleId` (Guid?) to JobEntity
 - [x] Added `ScheduleType` (string?) to JobEntity
 - [x] Removed IntervalScheduleEntity
 - [x] Removed IIntervalScheduleStore
 
-### Verification ✅
+### Verification
 
-- [x] Build successful ✅
-- [x] Cronos package integrated ✅
-- [x] Leader-only execution pattern ✅
-- [x] Schedule metadata properly set ✅
+- [ ] Build successful
+- [ ] Cronos package integrated
+- [ ] Leader-only execution pattern
+- [ ] Schedule metadata properly set
 
 ---
 
-## Stage 7: Dispatching ✅
+## Stage 7: Dispatching 🔲
 
-> **Status**: ✅ **COMPLETE**
+> **Status**: 🔲 **TODO**
 > 
 > **Goal**: Dispatch jobs to workers via transport
 > 
@@ -434,12 +444,12 @@ src/Coordinator/
 > 
 > **Files**: 2
 
-### Implementation ✅
+### Implementation
 
-- [x] **IJobDispatcher.cs** ✅
+- [ ] **IJobDispatcher.cs**
   - Method: `DispatchAsync(JobEntity job)`
 
-- [x] **JobDispatcher.cs** - Dispatch implementation ✅
+- [ ] **JobDispatcher.cs** - Dispatch implementation
   - Dispatch flow:
     1. Create `JobDispatchMessage` with new `ExecutionId`
     2. Publish to `job.dispatch.{queue}` channel (for workers)
@@ -447,22 +457,22 @@ src/Coordinator/
   - Uses `TransportChannels` for channel naming
   - Uses `IPublisher` to publish messages
 
-### Design Decisions ✅
+### Design Decisions
 
 - **ExecutionId**: Renamed from `HistoryId` for semantic clarity - represents each job execution
 - **Worker-only dispatch**: Followers will subscribe in Stage 10 (Follower Coordination)
 - **Status update**: Job marked as `Dispatched` immediately after publishing
 
-### Verification ✅
+### Verification
 
-- [x] Build successful ✅
-- [x] ExecutionId renamed across all job messages ✅
+- [ ] Build successful
+- [ ] ExecutionId renamed across all job messages
 
 ---
 
-## Stage 8: Job Queue Scanning ✅
+## Stage 8: Job Queue Scanning 🔲
 
-> **Status**: ✅ **COMPLETE**
+> **Status**: 🔲 **TODO**
 > 
 > **Goal**: Scan pending jobs from database and dispatch to workers
 > 
@@ -472,30 +482,31 @@ src/Coordinator/
 > 
 > **Complexity**: **MEDIUM** - Leader-only background service
 
-### Implementation ✅
+### Implementation
 
-- [x] **JobQueueScanner.cs** - Background service (Leader only) ✅
+- [ ] **JobQueueScanner.cs** - Background service (Leader only)
+  - **Inherits**: `ScopedProcessingService`
   - Check `ILeaderElection.IsLeader` before processing
   - Run every 5 seconds
-  - Process flow:
+  - Process flow (Scoped):
     1. Query pending jobs: `Status = Pending` AND (`ScheduledAt <= NOW` OR `ScheduledAt IS NULL`)
     2. Order by: `Priority DESC`, `CreatedAt ASC`
     3. Limit: 100 jobs per scan
     4. For each job: call `IJobDispatcher.DispatchAsync(job)`
   - Handle errors gracefully (log and continue)
 
-### Design Decisions ✅
+### Design Decisions
 
 - **Leader-only**: Prevent duplicate dispatching
 - **Batch size**: 100 jobs per scan to avoid overwhelming system
 - **Scan interval**: 5 seconds for responsive dispatching
 - **Priority ordering**: High priority jobs dispatched first
 
-### Verification ✅
+### Verification
 
-- [x] Build successful ✅
-- [x] Leader-only execution pattern ✅
-- [x] Batch processing implemented ✅
+- [ ] Build successful
+- [ ] Leader-only execution pattern
+- [ ] Batch processing implemented
 
 ---
 
@@ -509,7 +520,7 @@ src/Coordinator/
 > 
 > **Files**: 0
 
-### Decision ✅
+### Decision
 
 - **Worker metrics**: Follower coordinators will subscribe to `worker.{workerId}.metrics` and process worker heartbeats
 - **Job timeout**: Follower coordinators monitor job timeout via job status updates

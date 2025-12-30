@@ -2,7 +2,6 @@
   <Folder Name="/src/">
     <Project Path="src/Orchestrix.Abstractions/Orchestrix.Abstractions.csproj" />
   </Folder>
-  <Folder Name="/docs/" />
   <Folder Name="/src/Locking/">
     <Project Path="src/Locking/Orchestrix.Locking.Abstractions/Orchestrix.Locking.Abstractions.csproj" />
     <Project Path="src/Locking/Orchestrix.Locking.InMemory/Orchestrix.Locking.InMemory.csproj" />
@@ -19,5 +18,4 @@
     <Project Path="src/Coordinator/Orchestrix.Coordinator.Abstractions/Orchestrix.Coordinator.Abstractions.csproj" />
     <Project Path="src/Coordinator/Orchestrix.Coordinator/Orchestrix.Coordinator.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
 </Solution>
