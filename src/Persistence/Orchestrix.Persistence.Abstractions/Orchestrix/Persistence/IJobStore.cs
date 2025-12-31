@@ -85,8 +85,10 @@ public interface IJobStore
 
     // === Queries (for monitoring/debugging) ===
     
+
     /// <summary>
     /// Gets a job by ID (for status queries).
     /// </summary>
     Task<JobEntity?> GetByIdAsync(Guid jobId, CancellationToken cancellationToken = default);
+
 }

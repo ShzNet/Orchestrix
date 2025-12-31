@@ -21,13 +21,17 @@ public static class PersistenceServiceCollectionExtensions
     public static IPersistenceConfigurationBuilder UseEfCore<TContext>(this IPersistenceConfigurationBuilder builder, Action<DbContextOptionsBuilder>? configure = null)
         where TContext : CoordinatorDbContext
     {
-        builder.Services.AddDbContext<TContext>(options =>
+        // Only register DbContext if it hasn't been registered yet
+        if (builder.Services.All(x => x.ServiceType != typeof(DbContextOptions<TContext>)))
         {
-            if (configure != null)
+            builder.Services.AddDbContext<TContext>(options =>
             {
-                configure(options);
-            }
-        });
+                if (configure != null)
+                {
+                    configure(options);
+                }
+            });
+        }
 
         // Register the abstract CoordinatorDbContext to resolve to TContext
         builder.Services.TryAddScoped<CoordinatorDbContext>(sp => sp.GetRequiredService<TContext>());

@@ -3,7 +3,9 @@ using Orchestrix.Coordinator.Core.Builders;
 using Orchestrix.Coordinator.HostedServices.Clustering;
 using Orchestrix.Coordinator.Services.Clustering;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Orchestrix.Coordinator.Communication;
 using Orchestrix.Logging.Persistence;
+using Orchestrix.Transport;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -37,12 +39,20 @@ public static class CoordinatorServiceCollectionExtensions
         // Register Options (singleton for now, or use IOptions pattern properly later)
         services.AddSingleton(options);
 
+        services.AddOptions<TransportOptions>();
+        services.AddSingleton<CoordinatorChannels>();
         // Register Core Services
         services.AddSingleton<LeaderElection>();
         // services.AddSingleton<ILeaderElection>(sp => sp.GetRequiredService<LeaderElection>()); // If needed
         services.AddSingleton<ILeaderElection>(sp => sp.GetRequiredService<LeaderElection>());
         services.AddHostedService<LeaderElectionHostedService>();
         services.AddHostedService<NodeHeartbeatHostedService>();
+        services.AddHostedService<ClusterHealthMonitorHostedService>();
+        
+        // Monitoring
+        services.TryAddSingleton<Orchestrix.Coordinator.Services.Monitoring.ISystemMetricsCollector, Orchestrix.Coordinator.Services.Monitoring.SystemMetricsCollector>();
+        services.TryAddSingleton<Orchestrix.Coordinator.Services.Monitoring.IJobStatsCache, Orchestrix.Coordinator.Services.Monitoring.JobStatsCache>();
+        services.TryAddScoped<Orchestrix.Coordinator.Services.Monitoring.INodeMetricsCollector, Orchestrix.Coordinator.Services.Monitoring.NodeMetricsCollector>();
         
         // Default Logging
         services.TryAddScoped<ILogStore, Orchestrix.Coordinator.Services.LoggerLogStore>();

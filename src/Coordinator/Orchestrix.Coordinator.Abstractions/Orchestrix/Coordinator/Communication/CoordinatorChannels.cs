@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Orchestrix.Transport;
 
 namespace Orchestrix.Coordinator.Communication;
@@ -13,18 +14,12 @@ public class CoordinatorChannels
     /// <summary>
     /// Initializes a new instance with options from TransportOptions.
     /// </summary>
-    public CoordinatorChannels(TransportOptions options)
+    public CoordinatorChannels(IOptions<TransportOptions> options)
     {
-        _prefix = options.ChannelPrefix;
+        _prefix = options.Value.ChannelPrefix;
     }
 
-    /// <summary>
-    /// Initializes a new instance with a custom prefix.
-    /// </summary>
-    public CoordinatorChannels(string prefix = "orchestrix")
-    {
-        _prefix = prefix;
-    }
+   
 
     /// <summary>
     /// Channel for coordinator node metrics and heartbeats.

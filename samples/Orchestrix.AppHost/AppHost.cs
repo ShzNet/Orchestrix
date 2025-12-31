@@ -11,9 +11,6 @@ builder.AddProject<Projects.Orchestrix_Coordinator_Sample>("Orchestrix")
     .WaitFor(redis)
     .WaitFor(db)
     .WithReference(redis)
-    .WaitFor(redis)
-    .WaitFor(db)
-    .WithReference(redis)
     .WithReference(db)
     .WithReplicas(2);
 

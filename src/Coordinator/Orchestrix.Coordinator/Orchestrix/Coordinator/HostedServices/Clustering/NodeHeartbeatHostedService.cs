@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Orchestrix.Persistence.Entities;
 using Orchestrix.Persistence;
+using Orchestrix.Coordinator.Communication;
+using Orchestrix.Transport;
 
 namespace Orchestrix.Coordinator.HostedServices.Clustering;
 
@@ -13,23 +15,31 @@ public class NodeHeartbeatHostedService : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly CoordinatorOptions _options;
+    private readonly CoordinatorChannels _channels;
     private readonly ILogger<NodeHeartbeatHostedService> _logger;
     private readonly string _nodeId;
+    private readonly IPublisher _publisher;
 
     /// <summary>
     /// Initializes a new instance of <see cref="NodeHeartbeatHostedService"/>.
     /// </summary>
     /// <param name="scopeFactory">The service scope factory.</param>
     /// <param name="options">The coordinator options.</param>
+    /// <param name="channels">The coordinator channel names.</param>
     /// <param name="logger">The logger.</param>
+    /// <param name="publisher">The publisher</param>
     public NodeHeartbeatHostedService(
         IServiceScopeFactory scopeFactory,
         CoordinatorOptions options,
-        ILogger<NodeHeartbeatHostedService> logger)
+        CoordinatorChannels channels,
+        ILogger<NodeHeartbeatHostedService> logger, 
+        IPublisher publisher)
     {
         _scopeFactory = scopeFactory;
         _options = options;
+        _channels = channels;
         _logger = logger;
+        _publisher = publisher;
         _nodeId = options.NodeId;
     }
 
@@ -51,6 +61,7 @@ public class NodeHeartbeatHostedService : BackgroundService
             {
                 using var scope = _scopeFactory.CreateScope();
                 var nodeStore = scope.ServiceProvider.GetRequiredService<ICoordinatorNodeStore>();
+                var metricsCollector = scope.ServiceProvider.GetRequiredService<Orchestrix.Coordinator.Services.Monitoring.INodeMetricsCollector>();
 
                 var node = new CoordinatorNodeEntity
                 {
@@ -63,7 +74,15 @@ public class NodeHeartbeatHostedService : BackgroundService
                 };
 
                 await nodeStore.UpdateHeartbeatAsync(node, stoppingToken);
-                _logger.LogDebug("Heartbeat updated for Node {NodeId}", _nodeId);
+                
+                // Collect full metrics (including job counts)
+                var metricsMessage = await metricsCollector.CollectMetricsAsync(node, stoppingToken);
+                // Ensure helper fills properties we might have missed or that are updated by collector
+
+                await _publisher.PublishAsync(_channels.CoordinatorMetrics, metricsMessage, stoppingToken);
+
+                _logger.LogDebug("Heartbeat updated for Node {NodeId}. CPU: {Cpu}m, Mem: {Mem}MB, Jobs: {Jobs}, Queued: {Queued}", 
+                    _nodeId, metricsMessage.CpuMillicores, metricsMessage.MemoryUsageBytes / 1024 / 1024, metricsMessage.JobCount, metricsMessage.QueuedJobCount);
             }
             catch (OperationCanceledException)
             {
@@ -84,6 +103,8 @@ public class NodeHeartbeatHostedService : BackgroundService
             }
         }
     }
+
+
 
     /// <inheritdoc />
     public override async Task StopAsync(CancellationToken cancellationToken)

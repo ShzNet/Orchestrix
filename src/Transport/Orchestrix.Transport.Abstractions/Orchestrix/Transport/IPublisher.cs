@@ -6,11 +6,12 @@ namespace Orchestrix.Transport;
 public interface IPublisher
 {
     /// <summary>
-    /// Publishes a message to the specified channel.
+    /// Publishes a message to the specified channel/stream.
     /// </summary>
     /// <typeparam name="T">The message type.</typeparam>
-    /// <param name="channel">The channel name.</param>
+    /// <param name="channel">The channel/stream name.</param>
     /// <param name="message">The message to publish.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task PublishAsync<T>(string channel, T message, CancellationToken cancellationToken = default);
 }
+

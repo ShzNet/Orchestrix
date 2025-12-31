@@ -16,9 +16,17 @@ public static class RedisTransportServiceCollectionExtensions
     /// </summary>
     /// <param name="builder">The transport configuration builder.</param>
     /// <param name="connectionString">The Redis connection string.</param>
+    /// <param name="configure">Optional configuration for Redis transport options.</param>
     /// <returns>The transport configuration builder.</returns>
-    public static ITransportConfigurationBuilder UseRedis(this ITransportConfigurationBuilder builder, string connectionString)
+    public static ITransportConfigurationBuilder UseRedis(
+        this ITransportConfigurationBuilder builder, 
+        string connectionString,
+        Action<RedisTransportOptions>? configure = null)
     {
+        var options = new RedisTransportOptions();
+        configure?.Invoke(options);
+        builder.Services.TryAddSingleton(options);
+        
         builder.Services.TryAddSingleton<IMessageSerializer, JsonMessageSerializer>();
         
         builder.Services.TryAddSingleton<StackExchange.Redis.IConnectionMultiplexer>(sp => 
