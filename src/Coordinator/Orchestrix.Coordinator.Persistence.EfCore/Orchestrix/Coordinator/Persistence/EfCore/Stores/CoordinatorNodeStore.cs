@@ -25,6 +25,8 @@ public class CoordinatorNodeStore(CoordinatorDbContext context) : ICoordinatorNo
             // But if the node object passed in has fresh state, use it.
             existing.Metadata = node.Metadata;
             existing.Status = node.Status;
+            existing.Hostname = node.Hostname;
+            existing.ProcessId = node.ProcessId;
         }
         await context.SaveChangesAsync(cancellationToken);
     }

@@ -42,12 +42,22 @@ public class LeaderElection(
                 DefaultTtl = options.LeaderLeaseDuration
             });
 
+            logger.LogDebug("[LeaderElection] Trying to acquire leader lock: {Resource}", LockResource);
             if (await lockHandle.TryAcquireAsync(options.LeaderLeaseDuration, ct))
             {
+                logger.LogInformation("[LeaderElection] Successfully acquired leadership for node {NodeId}", options.NodeId);
                 _currentLock = lockHandle;
                 SetLeadership(true);
                 return true;
             }
+            else
+            {
+                logger.LogDebug("[LeaderElection] Failed to acquire leader lock (already held). Node {NodeId} is Follower.", options.NodeId);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected during shutdown
         }
         catch (Exception ex)
         {
@@ -66,8 +76,10 @@ public class LeaderElection(
 
         try
         {
+            logger.LogDebug("[LeaderElection] Extending leadership for node {NodeId}", options.NodeId);
             if (await _currentLock.ExtendAsync(options.LeaderLeaseDuration, ct))
             {
+                logger.LogDebug("[LeaderElection] Leadership extended successfully.");
                 return true;
             }
             

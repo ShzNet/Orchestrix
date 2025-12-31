@@ -39,6 +39,16 @@ public class CoordinatorNodeEntity
     /// When the node first joined the cluster.
     /// </summary>
     public DateTimeOffset JoinedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    /// <summary>
+    /// Hostname or machine name where the node is running.
+    /// </summary>
+    public string? Hostname { get; set; }
+
+    /// <summary>
+    /// Process ID of the running node.
+    /// </summary>
+    public int? ProcessId { get; set; }
 }
 
 /// <summary>

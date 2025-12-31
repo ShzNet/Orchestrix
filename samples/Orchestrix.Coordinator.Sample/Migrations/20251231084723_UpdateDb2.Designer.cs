@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Orchestrix.Coordinator.Persistence.EfCore;
@@ -11,9 +12,11 @@ using Orchestrix.Coordinator.Persistence.EfCore;
 namespace Migrations
 {
     [DbContext(typeof(CoordinatorDbContext))]
-    partial class CoordinatorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251231084723_UpdateDb2")]
+    partial class UpdateDb2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

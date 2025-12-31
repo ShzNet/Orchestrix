@@ -67,7 +67,7 @@ public class JobStore(CoordinatorDbContext context) : IJobStore
     {
         try
         {
-            var job = await context.Jobs.FindAsync(new object[] { jobId }, cancellationToken);
+            var job = await context.Jobs.FindAsync([jobId], cancellationToken);
             if (job == null) return false;
 
             // In-memory check: if already claimed, fail immediately

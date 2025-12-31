@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Orchestrix.Coordinator.Persistence.EfCore;
@@ -11,9 +12,11 @@ using Orchestrix.Coordinator.Persistence.EfCore;
 namespace Migrations
 {
     [DbContext(typeof(CoordinatorDbContext))]
-    partial class CoordinatorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251231083722_UpdateDb1")]
+    partial class UpdateDb1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,9 +54,9 @@ namespace Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<byte[]>("Timestamp")
+                    b.Property<long>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bigint");
 
                     b.HasKey("NodeId");
 
@@ -101,9 +104,9 @@ namespace Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<byte[]>("Timestamp")
+                    b.Property<long>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -215,9 +218,9 @@ namespace Migrations
                     b.Property<TimeSpan?>("Timeout")
                         .HasColumnType("interval");
 
-                    b.Property<byte[]>("Timestamp")
+                    b.Property<long>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("WorkerId")
                         .HasColumnType("text");
@@ -323,9 +326,9 @@ namespace Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<byte[]>("Timestamp")
+                    b.Property<long>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bigint");
 
                     b.HasKey("WorkerId");
 

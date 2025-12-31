@@ -56,20 +56,30 @@ public class CoordinatorDbContext(DbContextOptions<CoordinatorDbContext> options
             entity.HasIndex(e => e.Status);
             entity.HasIndex(e => e.ScheduledAt); // For polling due jobs
             entity.HasIndex(e => e.FollowerNodeId); // For follower partition
-            entity.Property<uint>("Version").IsConcurrencyToken(); // Optimistic Concurrency
+            entity.HasIndex(e => e.FollowerNodeId); // For follower partition
+            entity.Property<byte[]>("Timestamp").IsConcurrencyToken(); // Optimistic Concurrency
         });
 
         modelBuilder.Entity<JobHistoryEntity>().HasKey(e => e.Id);
         
-        modelBuilder.Entity<CronScheduleEntity>().HasKey(e => e.Id);
+        modelBuilder.Entity<CronScheduleEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property<byte[]>("Timestamp").IsConcurrencyToken();
+        });
 
         modelBuilder.Entity<WorkerEntity>(entity =>
         {
             entity.HasKey(e => e.WorkerId);
             entity.HasIndex(e => e.LastHeartbeat);
+            entity.Property<byte[]>("Timestamp").IsConcurrencyToken();
         });
 
-        modelBuilder.Entity<CoordinatorNodeEntity>().HasKey(e => e.NodeId);
+        modelBuilder.Entity<CoordinatorNodeEntity>(entity =>
+        {
+            entity.HasKey(e => e.NodeId);
+            entity.Property<byte[]>("Timestamp").IsConcurrencyToken();
+        });
         
         modelBuilder.Entity<DeadLetterEntity>().HasKey(e => e.Id);
         
@@ -92,18 +102,14 @@ public class CoordinatorDbContext(DbContextOptions<CoordinatorDbContext> options
 
     private void UpdateConcurrencyTokens()
     {
+        var nowBytes = BitConverter.GetBytes(DateTime.UtcNow.Ticks);
         foreach (var entry in ChangeTracker.Entries())
         {
-            if (entry.State == EntityState.Modified || entry.State == EntityState.Added)
-            {
-                var versionProp = entry.Metadata.FindProperty("Version");
-                if (versionProp != null && versionProp.IsConcurrencyToken)
-                {
-                    var prop = entry.Property("Version");
-                    uint current = prop.CurrentValue is uint val ? val : 0u;
-                    prop.CurrentValue = current + 1;
-                }
-            }
+            if (entry.State != EntityState.Modified && entry.State != EntityState.Added) continue;
+            var versionProp = entry.Metadata.FindProperty("Timestamp");
+            if (versionProp is not { IsConcurrencyToken: true }) continue;
+            
+            entry.Property("Timestamp").CurrentValue = nowBytes;
         }
     }
 }

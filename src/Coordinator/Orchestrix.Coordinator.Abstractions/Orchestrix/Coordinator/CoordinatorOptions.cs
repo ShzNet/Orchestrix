@@ -9,8 +9,9 @@ public class CoordinatorOptions
 {
     /// <summary>
     /// Unique identifier for this coordinator node.
+    /// Defaults to a random GUID if not specified.
     /// </summary>
-    public string NodeId { get; set; } = Environment.MachineName;
+    public string NodeId { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>
     /// Interval between heartbeat/metrics broadcasts.

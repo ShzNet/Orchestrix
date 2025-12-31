@@ -39,6 +39,7 @@ public static class CoordinatorServiceCollectionExtensions
         // services.AddSingleton<ILeaderElection>(sp => sp.GetRequiredService<LeaderElection>()); // If needed
         services.AddSingleton<ILeaderElection>(sp => sp.GetRequiredService<LeaderElection>());
         services.AddHostedService<LeaderElectionHostedService>();
+        services.AddHostedService<NodeHeartbeatHostedService>();
 
         return services;
     }
