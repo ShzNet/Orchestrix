@@ -1,0 +1,19 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <UserSecretsId>06b30aaa-37b6-4841-8a96-4eb5a4eb3ed7</UserSecretsId>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Orchestrix.Coordinator.Sample\Orchestrix.Coordinator.Sample.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Aspire.Hosting.Redis" />
+      <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+    </ItemGroup>
+
+</Project>

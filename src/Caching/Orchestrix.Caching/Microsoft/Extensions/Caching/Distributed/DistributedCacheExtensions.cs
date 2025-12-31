@@ -13,53 +13,50 @@ public static class DistributedCacheExtensions
         WriteIndented = false
     };
 
-    /// <summary>
-    /// Gets an object from cache.
-    /// </summary>
-    public static async Task<T?> GetObjectAsync<T>(
-        this IDistributedCache cache,
-        string key,
-        CancellationToken cancellationToken = default) where T : class
+    extension(IDistributedCache cache)
     {
-        var bytes = await cache.GetAsync(key, cancellationToken);
-        if (bytes == null || bytes.Length == 0)
+        /// <summary>
+        /// Gets an object from cache.
+        /// </summary>
+        public async Task<T?> GetObjectAsync<T>(string key,
+            CancellationToken cancellationToken = default) where T : class
         {
-            return null;
+            var bytes = await cache.GetAsync(key, cancellationToken);
+            if (bytes == null || bytes.Length == 0)
+            {
+                return null;
+            }
+
+            return JsonSerializer.Deserialize<T>(bytes, DefaultJsonOptions);
         }
 
-        return JsonSerializer.Deserialize<T>(bytes, DefaultJsonOptions);
-    }
-
-    /// <summary>
-    /// Sets an object in cache.
-    /// </summary>
-    public static async Task SetObjectAsync<T>(
-        this IDistributedCache cache,
-        string key,
-        T value,
-        TimeSpan ttl,
-        CancellationToken cancellationToken = default) where T : class
-    {
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(value, DefaultJsonOptions);
-        var options = new DistributedCacheEntryOptions
+        /// <summary>
+        /// Sets an object in cache.
+        /// </summary>
+        public async Task SetObjectAsync<T>(string key,
+            T value,
+            TimeSpan ttl,
+            CancellationToken cancellationToken = default) where T : class
         {
-            AbsoluteExpirationRelativeToNow = ttl
-        };
+            var bytes = JsonSerializer.SerializeToUtf8Bytes(value, DefaultJsonOptions);
+            var options = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = ttl
+            };
 
-        await cache.SetAsync(key, bytes, options, cancellationToken);
-    }
+            await cache.SetAsync(key, bytes, options, cancellationToken);
+        }
 
-    /// <summary>
-    /// Sets an object in cache with custom options.
-    /// </summary>
-    public static async Task SetObjectAsync<T>(
-        this IDistributedCache cache,
-        string key,
-        T value,
-        DistributedCacheEntryOptions options,
-        CancellationToken cancellationToken = default) where T : class
-    {
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(value, DefaultJsonOptions);
-        await cache.SetAsync(key, bytes, options, cancellationToken);
+        /// <summary>
+        /// Sets an object in cache with custom options.
+        /// </summary>
+        public async Task SetObjectAsync<T>(string key,
+            T value,
+            DistributedCacheEntryOptions options,
+            CancellationToken cancellationToken = default) where T : class
+        {
+            var bytes = JsonSerializer.SerializeToUtf8Bytes(value, DefaultJsonOptions);
+            await cache.SetAsync(key, bytes, options, cancellationToken);
+        }
     }
 }

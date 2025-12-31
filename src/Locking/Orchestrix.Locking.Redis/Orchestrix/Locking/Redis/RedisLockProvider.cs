@@ -8,6 +8,7 @@ using StackExchange.Redis;
 public class RedisLockProvider(IConnectionMultiplexer connection, RedisLockOptions options)
     : IDistributedLockProvider
 {
+    /// <inheritdoc/>
     public IDistributedLock CreateLock(string resource, DistributedLockOptions? options1 = null)
     {
         var database = connection.GetDatabase();

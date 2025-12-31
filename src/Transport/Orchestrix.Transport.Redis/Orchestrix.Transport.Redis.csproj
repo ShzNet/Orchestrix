@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace/>
+    
+    <PackageId>Orchestrix.Transport.Redis</PackageId>
+    <Description>Redis transport implementation for Orchestrix</Description>
+    <PackageTags>orchestrix;jobs;transport;redis</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Orchestrix.Transport.Abstractions\Orchestrix.Transport.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" />
+  </ItemGroup>
+
+</Project>

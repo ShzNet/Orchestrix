@@ -1,9 +1,10 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Orchestrix.Locking;
 using Orchestrix.Locking.Redis;
 using StackExchange.Redis;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Orchestrix.Locking;
 
 /// <summary>
 /// Extension methods for configuring Redis locking.

@@ -2,13 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <RootNamespace>Orchestrix.Coordinator</RootNamespace>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
+    <RootNamespace/>
     
     <PackageId>Orchestrix.Coordinator.Abstractions</PackageId>
     <Description>Communication abstractions for Orchestrix Coordinator - channels and messages</Description>
-    <Authors>Shizaki</Authors>
+    <PackageTags>orchestrix;jobs;coordinator;abstractions</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

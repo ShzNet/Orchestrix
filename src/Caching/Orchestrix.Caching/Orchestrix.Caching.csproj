@@ -2,14 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <RootNamespace>Orchestrix.Caching</RootNamespace>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
     <RootNamespace/>
-    
     <PackageId>Orchestrix.Caching</PackageId>
     <Description>Orchestrix Caching - extension methods for IDistributedCache with object serialization</Description>
-    <Authors>Shizaki</Authors>
+    <PackageTags>orchestrix;jobs;caching;distributed</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

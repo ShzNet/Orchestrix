@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace/>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    
+    <PackageId>Orchestrix.Locking.InMemory</PackageId>
+    <Description>In-memory locking implementation for Orchestrix</Description>
+    <PackageTags>orchestrix;jobs;locking;in-memory</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

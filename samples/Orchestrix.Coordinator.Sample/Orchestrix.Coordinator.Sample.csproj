@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace/>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Coordinator\Orchestrix.Coordinator\Orchestrix.Coordinator.csproj" />
+    <ProjectReference Include="..\Orchestrix.ServiceDefaults\Orchestrix.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\src\Locking\Orchestrix.Locking.Redis\Orchestrix.Locking.Redis.csproj" />
+    <ProjectReference Include="..\..\src\Locking\Orchestrix.Locking.InMemory\Orchestrix.Locking.InMemory.csproj" />
+    <ProjectReference Include="..\..\src\Transport\Orchestrix.Transport.Redis\Orchestrix.Transport.Redis.csproj" />
+    <ProjectReference Include="..\..\src\Coordinator\Orchestrix.Coordinator.Persistence.EfCore\Orchestrix.Coordinator.Persistence.EfCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+
+</Project>

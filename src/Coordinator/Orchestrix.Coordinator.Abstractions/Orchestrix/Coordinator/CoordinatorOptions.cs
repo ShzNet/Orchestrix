@@ -43,15 +43,3 @@ public class CoordinatorOptions
     /// </summary>
     public string CachePrefix { get; set; } = "orchestrix";
 }
-
-/// <summary>
-/// Builder interface for configuring persistence.
-/// Extension methods should be defined in persistence packages (e.g., UseEfCore in Orchestrix.Persistence.EfCore).
-/// </summary>
-public interface IPersistenceConfigurationBuilder
-{
-    /// <summary>
-    /// Gets the service collection.
-    /// </summary>
-    IServiceCollection Services { get; }
-}

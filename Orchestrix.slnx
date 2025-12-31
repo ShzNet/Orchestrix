@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="nuget.config" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Orchestrix.Abstractions/Orchestrix.Abstractions.csproj" />
   </Folder>
@@ -9,6 +14,7 @@
   </Folder>
   <Folder Name="/src/Transport/">
     <Project Path="src/Transport/Orchestrix.Transport.Abstractions/Orchestrix.Transport.Abstractions.csproj" />
+    <Project Path="src/Transport/Orchestrix.Transport.Redis/Orchestrix.Transport.Redis.csproj" />
   </Folder>
   <Folder Name="/src/Caching/">
     <Project Path="src/Caching/Orchestrix.Caching/Orchestrix.Caching.csproj" />
@@ -16,6 +22,12 @@
   <Folder Name="/src/Coordinator/">
     <Project Path="src/Coordinator/Orchestrix.Coordinator.Persistence.Abstractions/Orchestrix.Coordinator.Persistence.Abstractions.csproj" />
     <Project Path="src/Coordinator/Orchestrix.Coordinator.Abstractions/Orchestrix.Coordinator.Abstractions.csproj" />
+    <Project Path="src/Coordinator/Orchestrix.Coordinator.Persistence.EfCore/Orchestrix.Coordinator.Persistence.EfCore.csproj" />
     <Project Path="src/Coordinator/Orchestrix.Coordinator/Orchestrix.Coordinator.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/Orchestrix.ServiceDefaults/Orchestrix.ServiceDefaults.csproj" />
+    <Project Path="samples/Orchestrix.AppHost/Orchestrix.AppHost.csproj" />
+    <Project Path="samples/Orchestrix.Coordinator.Sample/Orchestrix.Coordinator.Sample.csproj" />
   </Folder>
 </Solution>

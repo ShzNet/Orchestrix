@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace/>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    
+    <PackageId>Orchestrix.Transport.Abstractions</PackageId>
+    <Description>Transport abstractions for Orchestrix</Description>
+    <PackageTags>orchestrix;jobs;transport;abstractions</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

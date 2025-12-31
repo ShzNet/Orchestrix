@@ -5,14 +5,23 @@
     <LangVersion>latest</LangVersion>
     
     <!-- Package Info -->
+    <Version>0.1.0</Version>
     <Authors>Shizaki</Authors>
     <Company>Shizaki</Company>
     <Copyright>Copyright © Shizaki 2025</Copyright>
     <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/shizaki/Orchestrix</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/shizaki/Orchestrix</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     
     <!-- Build settings -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
+    
+    <!-- Source Link -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 </Project>

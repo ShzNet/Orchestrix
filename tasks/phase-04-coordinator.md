@@ -101,13 +101,60 @@ src/Coordinator/
 ├── Orchestrix.Coordinator.Abstractions/
 ├── Orchestrix.Coordinator.Persistence.Abstractions/
 └── Orchestrix.Coordinator/
+    ├── Core/                       # Options & DI
+    ├── HostedServices/             # BackgroundServices (Interval Triggers)
+    │   ├── Base/                   # IntervalHostedService
+    │   ├── Clustering/             # Leadership, Heartbeat, ClusterMonitor
+    │   ├── Monitoring/             # WorkerMonitor (Execution Workers)
+    │   ├── Scheduling/             # ScheduleScanner
+    │   └── Dispatching/            # JobQueueScanner
+    └── Services/                   # Scoped Services (Business Logic)
+        ├── Clustering/             # Locking, Registry, Health
+        ├── Monitoring/             # WorkerHealth
+        ├── Scheduling/             # Scanner, Planner, Parser
+        └── Dispatching/            # Dispatcher, Scanner
+
+## Namespace Convention
+- **Project**: `Orchestrix.Coordinator`
+- **Hosted Services**: `Orchestrix.Coordinator.HostedServices.{Feature}`
+- **Services**: `Orchestrix.Coordinator.Services.{Feature}`
+- **Core**: `Orchestrix.Coordinator.{Core}`
 ```
 
 **Total**: ~62 files across 12 stages
 
 ---
 
-## Stage 1: Persistence Abstractions ✅
+## Stage 0: Sample Project & Aspire 🔲
+
+> **Status**: 🔲 **TODO**
+> 
+> **Goal**: Create a playground environment with Aspire for observability
+> 
+> **Directory**: `samples/` (New root folder)
+> 
+> **Projects**: 
+> - `Orchestrix.AppHost` (Aspire Host)
+> - `Orchestrix.ServiceDefaults` (OpenTelemetry, HealthChecks)
+> - `Orchestrix.Coordinator.Sample` (Worker Service)
+> 
+> **Why**: 
+> - Faster feedback loop than deploying full cluster
+> - **Aspire Dashboard**: View logs, metrics, and traces (OpenTelemetry) out-of-the-box
+> - Keeps sample/test code separate from `src/`
+> 
+> ### Implementation
+> 
+> - [ ] **samples/Orchestrix.AppHost**: Manages resources (Redis, Coordinator nodes)
+> - [ ] **samples/Orchestrix.ServiceDefaults**: Shared configuration for OTel
+> - [ ] **samples/Orchestrix.Coordinator.Sample**:
+>   - Console/Worker app
+>   - Registers Coordinator services
+>   - Simulates job traffic
+> 
+> ---
+> 
+> ## Stage 1: Persistence Abstractions ✅
 
 > **Status**: ✅ **COMPLETE**
 > 

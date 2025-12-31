@@ -9,6 +9,7 @@ public class InMemoryLockProvider : IDistributedLockProvider
 {
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _semaphores = new();
 
+    /// <inheritdoc/>
     public IDistributedLock CreateLock(string resource, DistributedLockOptions? options = null)
     {
         var semaphore = _semaphores.GetOrAdd(resource, _ => new SemaphoreSlim(1, 1));
