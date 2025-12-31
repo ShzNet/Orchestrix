@@ -19,10 +19,16 @@
     <Project Path="src/Caching/Orchestrix.Caching/Orchestrix.Caching.csproj" />
   </Folder>
   <Folder Name="/src/Coordinator/">
-    <Project Path="src/Coordinator/Orchestrix.Coordinator.Persistence.Abstractions/Orchestrix.Coordinator.Persistence.Abstractions.csproj" />
     <Project Path="src/Coordinator/Orchestrix.Coordinator.Abstractions/Orchestrix.Coordinator.Abstractions.csproj" />
-    <Project Path="src/Coordinator/Orchestrix.Coordinator.Persistence.EfCore/Orchestrix.Coordinator.Persistence.EfCore.csproj" />
     <Project Path="src/Coordinator/Orchestrix.Coordinator/Orchestrix.Coordinator.csproj" />
+  </Folder>
+  <Folder Name="/src/Persistence/">
+    <Project Path="src/Persistence/Orchestrix.Persistence.Abstractions/Orchestrix.Persistence.Abstractions.csproj" />
+    <Project Path="src/Persistence/Orchestrix.Persistence.EfCore/Orchestrix.Persistence.EfCore.csproj" />
+  </Folder>
+  <Folder Name="/src/Logging/">
+    <Project Path="src/Logging/Orchestrix.Logging.Persistence.Abstractions/Orchestrix.Logging.Persistence.Abstractions.csproj" />
+    <Project Path="src/Logging/Orchestrix.Logging.Persistence.AzureBlob/Orchestrix.Logging.Persistence.AzureBlob.csproj" />
   </Folder>
   <Folder Name="/samples/">
     <Project Path="samples/Orchestrix.ServiceDefaults/Orchestrix.ServiceDefaults.csproj" />

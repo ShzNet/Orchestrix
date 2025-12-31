@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <RootNamespace/>
+    <RootNamespace />
     
     <PackageId>Orchestrix.Coordinator</PackageId>
     <Description>Core Coordinator logic for Orchestrix</Description>
@@ -11,10 +11,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Orchestrix.Coordinator.Abstractions\Orchestrix.Coordinator.Abstractions.csproj" />
-    <ProjectReference Include="..\Orchestrix.Coordinator.Persistence.Abstractions\Orchestrix.Coordinator.Persistence.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Persistence\Orchestrix.Persistence.Abstractions\Orchestrix.Persistence.Abstractions.csproj" />
     <ProjectReference Include="..\..\Caching\Orchestrix.Caching\Orchestrix.Caching.csproj" />
     <ProjectReference Include="..\..\Locking\Orchestrix.Locking.Abstractions\Orchestrix.Locking.Abstractions.csproj" />
     <ProjectReference Include="..\..\Transport\Orchestrix.Transport.Abstractions\Orchestrix.Transport.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Logging\Orchestrix.Logging.Persistence.Abstractions\Orchestrix.Logging.Persistence.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

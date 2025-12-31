@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using Orchestrix.Coordinator.Persistence.Entities;
-using Orchestrix.Coordinator.Persistence;
+using Orchestrix.Persistence.Entities;
+using Orchestrix.Persistence;
 
 namespace Orchestrix.Coordinator.HostedServices.Clustering;
 

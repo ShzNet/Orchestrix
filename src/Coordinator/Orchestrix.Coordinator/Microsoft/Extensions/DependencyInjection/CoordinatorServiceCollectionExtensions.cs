@@ -2,6 +2,8 @@ using Orchestrix.Coordinator;
 using Orchestrix.Coordinator.Core.Builders;
 using Orchestrix.Coordinator.HostedServices.Clustering;
 using Orchestrix.Coordinator.Services.Clustering;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Orchestrix.Logging.Persistence;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -26,8 +28,9 @@ public static class CoordinatorServiceCollectionExtensions
         var transport = new TransportConfigurationBuilder(services);
         var locking = new LockingConfigurationBuilder(services);
         var persistence = new PersistenceConfigurationBuilder(services);
+        var logging = new LoggingConfigurationBuilder(services);
 
-        var config = new CoordinatorConfiguration(services, transport, locking, persistence, options);
+        var config = new CoordinatorConfiguration(services, transport, locking, persistence, logging, options);
 
         configure(config);
 
@@ -40,6 +43,9 @@ public static class CoordinatorServiceCollectionExtensions
         services.AddSingleton<ILeaderElection>(sp => sp.GetRequiredService<LeaderElection>());
         services.AddHostedService<LeaderElectionHostedService>();
         services.AddHostedService<NodeHeartbeatHostedService>();
+        
+        // Default Logging
+        services.TryAddScoped<ILogStore, Orchestrix.Coordinator.Services.LoggerLogStore>();
 
         return services;
     }

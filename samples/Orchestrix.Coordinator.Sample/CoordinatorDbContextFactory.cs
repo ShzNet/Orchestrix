@@ -1,17 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Orchestrix.Coordinator.Persistence.EfCore;
-
-namespace Orchestrix.Coordinator.Sample;
+using Orchestrix.Persistence.EfCore;
 
 /// <summary>
 /// Design-time factory for creating <see cref="CoordinatorDbContext"/> to enable EF Core migrations.
 /// </summary>
-public class CoordinatorDbContextFactory : IDesignTimeDbContextFactory<CoordinatorDbContext>
+public class CoordinatorDbContextFactory : IDesignTimeDbContextFactory<SampleDbContext>
 {
-    public CoordinatorDbContext CreateDbContext(string[] args)
+    public SampleDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<CoordinatorDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<SampleDbContext>();
 
         // Use a dummy connection string for design-time. 
         // The actual connection string at runtime comes from configuration.
@@ -21,6 +19,6 @@ public class CoordinatorDbContextFactory : IDesignTimeDbContextFactory<Coordinat
             b.MigrationsAssembly("Orchestrix.Coordinator.Sample");
         });
 
-        return new CoordinatorDbContext(optionsBuilder.Options);
+        return new SampleDbContext(optionsBuilder.Options);
     }
 }

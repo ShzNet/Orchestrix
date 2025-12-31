@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orchestrix.Coordinator.Persistence;
+using Orchestrix.Persistence;
 using Orchestrix.Locking;
 using Orchestrix.Transport;
 

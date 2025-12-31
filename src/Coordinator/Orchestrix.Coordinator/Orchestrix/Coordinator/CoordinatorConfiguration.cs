@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orchestrix.Coordinator.Persistence;
+using Orchestrix.Persistence;
+using Orchestrix.Logging.Persistence;
 using Orchestrix.Locking;
 using Orchestrix.Transport;
 
@@ -13,6 +14,7 @@ public class CoordinatorConfiguration(
     ITransportConfigurationBuilder transport,
     ILockingConfigurationBuilder locking,
     IPersistenceConfigurationBuilder persistence,
+    ILoggingConfigurationBuilder logging,
     CoordinatorOptions options)
 {
     /// <summary>
@@ -34,6 +36,11 @@ public class CoordinatorConfiguration(
     /// Gets the persistence configuration builder.
     /// </summary>
     public IPersistenceConfigurationBuilder Persistence { get; } = persistence;
+
+    /// <summary>
+    /// Gets the logging configuration builder.
+    /// </summary>
+    public ILoggingConfigurationBuilder Logging { get; } = logging;
 
     /// <summary>
     /// Gets the coordinator options.

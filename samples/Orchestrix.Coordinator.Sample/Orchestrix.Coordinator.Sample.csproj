@@ -12,7 +12,8 @@
     <ProjectReference Include="..\..\src\Locking\Orchestrix.Locking.Redis\Orchestrix.Locking.Redis.csproj" />
     <ProjectReference Include="..\..\src\Locking\Orchestrix.Locking.InMemory\Orchestrix.Locking.InMemory.csproj" />
     <ProjectReference Include="..\..\src\Transport\Orchestrix.Transport.Redis\Orchestrix.Transport.Redis.csproj" />
-    <ProjectReference Include="..\..\src\Coordinator\Orchestrix.Coordinator.Persistence.EfCore\Orchestrix.Coordinator.Persistence.EfCore.csproj" />
+    <ProjectReference Include="..\..\src\Persistence\Orchestrix.Persistence.EfCore\Orchestrix.Persistence.EfCore.csproj" />
+    <ProjectReference Include="..\..\src\Logging\Orchestrix.Logging.Persistence.AzureBlob\Orchestrix.Logging.Persistence.AzureBlob.csproj" />
   </ItemGroup>
 
   <ItemGroup>
