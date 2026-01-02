@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace />
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Worker\Orchestrix.Worker\Orchestrix.Worker.csproj" />
+    <ProjectReference Include="..\..\src\Orchestrix.Abstractions\Orchestrix.Abstractions.csproj" />
+    <ProjectReference Include="..\Orchestrix.ServiceDefaults\Orchestrix.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\src\Transport\Orchestrix.Transport.Redis\Orchestrix.Transport.Redis.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+  </ItemGroup>
+
+</Project>

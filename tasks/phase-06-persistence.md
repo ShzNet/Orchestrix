@@ -82,9 +82,9 @@ src/Persistence/Orchestrix.Persistence.EfCore/
 
 ---
 
-## 6.2 Persistence.EfCore
+## 6.2 Persistence.EfCore ✅
 
-- [ ] `OrchestrixDbContext.cs`
+- [x] `OrchestrixDbContext.cs` ✅
   ```csharp
   public class OrchestrixDbContext : DbContext
   {
@@ -98,21 +98,20 @@ src/Persistence/Orchestrix.Persistence.EfCore/
   }
   ```
 
-- [ ] `Configurations/` - Entity configurations
-  - [ ] `JobEntityConfiguration.cs`
-  - [ ] `JobHistoryEntityConfiguration.cs`
-  - [ ] etc.
+- [x] `Configurations/` - Entity configurations ✅
+  - [x] `JobEntityConfiguration.cs`
+  - [x] `JobHistoryEntityConfiguration.cs`
+  - [x] etc.
 
-- [ ] Store implementations
-  - [ ] `EfCoreJobStore.cs`
-  - [ ] `EfCoreJobHistoryStore.cs`
-  - [ ] `EfCoreCronScheduleStore.cs`
-  - [ ] `EfCoreIntervalScheduleStore.cs`
-  - [ ] `EfCoreWorkerStore.cs`
-  - [ ] `EfCoreCoordinatorNodeStore.cs`
-  - [ ] `EfCoreLogStore.cs`
+- [x] Store implementations ✅
+  - [x] `JobStore.cs`
+  - [x] `JobHistoryStore.cs`
+  - [x] `CronScheduleStore.cs`
+  - [x] `WorkerStore.cs`
+  - [x] `CoordinatorNodeStore.cs`
+  - [x] `DeadLetterStore.cs`
 
-- [ ] `ServiceCollectionExtensions.cs`
+- [x] `ServiceCollectionExtensions.cs` ✅
 
 **Files: ~15**
 

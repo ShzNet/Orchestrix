@@ -11,6 +11,11 @@ public class WorkerEntity
     public string WorkerId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Hostname where the worker is running.
+    /// </summary>
+    public string HostName { get; set; } = string.Empty;
+
+    /// <summary>
     /// Queues this worker can process.
     /// </summary>
     public string[] Queues { get; set; } = [];

@@ -1,6 +1,7 @@
 using Orchestrix.Coordinator;
 using Orchestrix.Coordinator.Core.Builders;
 using Orchestrix.Coordinator.HostedServices.Clustering;
+using Orchestrix.Coordinator.HostedServices.Workers;
 using Orchestrix.Coordinator.Services.Clustering;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Orchestrix.Coordinator.Communication;
@@ -45,9 +46,15 @@ public static class CoordinatorServiceCollectionExtensions
         services.AddSingleton<LeaderElection>();
         // services.AddSingleton<ILeaderElection>(sp => sp.GetRequiredService<LeaderElection>()); // If needed
         services.AddSingleton<ILeaderElection>(sp => sp.GetRequiredService<LeaderElection>());
+        
+        // Cluster Hosted Services
         services.AddHostedService<LeaderElectionHostedService>();
         services.AddHostedService<NodeHeartbeatHostedService>();
         services.AddHostedService<ClusterHealthMonitorHostedService>();
+        
+        // Worker Hosted Services
+        services.AddHostedService<WorkerRegistrationHandler>();
+        services.AddHostedService<WorkerHeartbeatHandler>();
         
         // Monitoring
         services.TryAddSingleton<Orchestrix.Coordinator.Services.Monitoring.ISystemMetricsCollector, Orchestrix.Coordinator.Services.Monitoring.SystemMetricsCollector>();

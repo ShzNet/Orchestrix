@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Orchestrix.Coordinator.Sample\Orchestrix.Coordinator.Sample.csproj" />
+      <ProjectReference Include="..\Orchestrix.Worker.Sample\Orchestrix.Worker.Sample.csproj" />
     </ItemGroup>
 
     <ItemGroup>

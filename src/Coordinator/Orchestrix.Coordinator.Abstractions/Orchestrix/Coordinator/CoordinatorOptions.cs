@@ -43,4 +43,34 @@ public class CoordinatorOptions
     /// Prefix for cache keys (allows multiple Orchestrix instances on same cache).
     /// </summary>
     public string CachePrefix { get; set; } = "orchestrix";
+
+    /// <summary>
+    /// Interval for scanning cron schedules.
+    /// </summary>
+    public TimeSpan ScheduleScanInterval { get; set; } = TimeSpan.FromSeconds(10);
+
+    /// <summary>
+    /// Interval for scanning pending job queue.
+    /// </summary>
+    public TimeSpan JobQueueScanInterval { get; set; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// Maximum number of jobs to dispatch per scan iteration.
+    /// </summary>
+    public int JobQueueBatchSize { get; set; } = 100;
+
+    /// <summary>
+    /// Default heartbeat interval to configure for workers.
+    /// </summary>
+    public TimeSpan DefaultWorkerHeartbeatInterval { get; set; } = TimeSpan.FromSeconds(10);
+
+    /// <summary>
+    /// Default job timeout to configure for workers.
+    /// </summary>
+    public TimeSpan DefaultWorkerJobTimeout { get; set; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// Timeout to consider a worker as dead (no heartbeat).
+    /// </summary>
+    public TimeSpan DefaultWorkerTimeout { get; set; } = TimeSpan.FromSeconds(30);
 }

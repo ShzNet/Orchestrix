@@ -26,6 +26,9 @@
     <Project Path="src/Persistence/Orchestrix.Persistence.Abstractions/Orchestrix.Persistence.Abstractions.csproj" />
     <Project Path="src/Persistence/Orchestrix.Persistence.EfCore/Orchestrix.Persistence.EfCore.csproj" />
   </Folder>
+  <Folder Name="/src/Worker/">
+    <Project Path="src/Worker/Orchestrix.Worker/Orchestrix.Worker.csproj" />
+  </Folder>
   <Folder Name="/src/Logging/">
     <Project Path="src/Logging/Orchestrix.Logging.Persistence.Abstractions/Orchestrix.Logging.Persistence.Abstractions.csproj" />
     <Project Path="src/Logging/Orchestrix.Logging.Persistence.AzureBlob/Orchestrix.Logging.Persistence.AzureBlob.csproj" />
@@ -34,5 +37,6 @@
     <Project Path="samples/Orchestrix.ServiceDefaults/Orchestrix.ServiceDefaults.csproj" />
     <Project Path="samples/Orchestrix.AppHost/Orchestrix.AppHost.csproj" />
     <Project Path="samples/Orchestrix.Coordinator.Sample/Orchestrix.Coordinator.Sample.csproj" />
+    <Project Path="samples/Orchestrix.Worker.Sample/Orchestrix.Worker.Sample.csproj" />
   </Folder>
 </Solution>

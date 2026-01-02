@@ -73,4 +73,18 @@ public class TransportChannels
     /// <param name="workerId">The worker ID.</param>
     /// <returns>The channel name for the specified worker.</returns>
     public string WorkerMetrics(string workerId) => $"{_prefix}:worker:{workerId}:metrics";
+
+    /// <summary>
+    /// Gets the channel for aggregated worker metrics (Worker → All Coordinators).
+    /// Broadcast channel for coordinator monitoring.
+    /// </summary>
+    public string WorkerMetricsBroadcast => $"{_prefix}:worker:metrics";
+
+    /// <summary>
+    /// Gets the channel for worker configuration by worker (Coordinator → Worker).
+    /// Response channel for registration with runtime config.
+    /// </summary>
+    /// <param name="workerId">The worker ID.</param>
+    /// <returns>The channel name for the specified worker.</returns>
+    public string WorkerConfig(string workerId) => $"{_prefix}:worker:{workerId}:config";
 }

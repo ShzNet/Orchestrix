@@ -11,11 +11,11 @@
 |:------|:--------|:-------|
 | 0 | Project Setup | ✅ Done |
 | 1 | `Orchestrix.Abstractions` | ✅ Done |
-| 2 | `Orchestrix.Transport.*` | 🔄 In Progress |
+| 2 | `Orchestrix.Transport.*` | ✅ Done |
 | 3 | `Orchestrix.Locking.*` | ✅ Done |
-| 4 | `Orchestrix.Coordinator.*` | 🔄 In Progress (Stage 1/13 ✅) |
-| 5 | `Orchestrix.Worker` | 🔲 TODO |
-| 6 | `Orchestrix.Persistence.*` | 🔲 TODO |
+| 4 | `Orchestrix.Coordinator.*` | 🔄 In Progress (Stage 1-8/13 ✅) |
+| 5 | `Orchestrix.Worker` | ✅ Done |
+| 6 | `Orchestrix.Persistence.*` | ✅ Done |
 | 7 | `Orchestrix.ControlPanel` | 🔲 TODO |
 | 8 | `Orchestrix.ServiceApi` | 🔲 TODO |
 | 9 | `Orchestrix.Client` | 🔲 TODO |
@@ -86,10 +86,10 @@ All projects inherit from `Directory.Build.props`:
 - [x] Schedule types (ScheduleInfo, RetryPolicy)
 - [x] Polyfills for netstandard2.1 compatibility
 
-### Phase 2: Transport 🔄
+### Phase 2: Transport ✅
 > 📄 [`tasks/phase-2-transport.md`](./tasks/phase-2-transport.md)
 - [x] **2.1 Transport.Abstractions** - 7 channels, 7 messages, no polyfills, DI support
-- [ ] 2.2 Transport.Redis - Redis Streams implementation
+- [x] **2.2 Transport.Redis** - Redis Streams implementation
 - [ ] 2.3 Transport.RabbitMQ - RabbitMQ implementation
 - [ ] 2.4 Transport.Kafka - Kafka implementation
 - [ ] **Unit Tests**: `JsonMessageSerializerTests`
@@ -107,27 +107,30 @@ All projects inherit from `Directory.Build.props`:
   - Use-case driven store interfaces (EnqueueAsync, TryClaimJobAsync, etc.)
   - Follower coordination support (FollowerNodeId, ChannelsCleaned)
   - Retry logic & Dead Letter Queue
-- [ ] **Stage 2: Communication Abstractions** (CoordinatorChannels + Messages)
-- [ ] **Stage 3: Core Services** (CoordinatorService, Options, Builder)
-- [ ] **Stage 4: Caching Layer**
-- [ ] **Stage 5: Leader Election**
+- [x] **Stage 2: Communication Abstractions** ✅ (CoordinatorChannels + Messages)
+- [x] **Stage 3: Core Services** ✅ (CoordinatorService, Options, Builder)
+- [x] **Stage 4: Caching Layer** ✅
+- [x] **Stage 5: Leader Election** ✅
 - [ ] **Stage 6-13**: Scheduling, Dispatching, Follower coordination, Handlers, etc.
 - [ ] **Unit Tests**: `LeaderElectionTests`, `JobDispatcherTests`, `JobStateMachineTests`, `SchedulerTests`
 
 
-### Phase 5: Worker Core
+### Phase 5: Worker Core ✅
 > 📄 [`tasks/phase-5-worker.md`](./tasks/phase-5-worker.md)
-- [ ] Worker service
-- [ ] Job execution
-- [ ] Handler registry
-- [ ] Cancellation handling
+- [x] **Core**: WorkerOptions, WorkerState, WorkerConfiguration ✅
+- [x] **Execution**: IJobHandler, IJobExecutor, JobExecutor, JobContext ✅
+- [x] **Registry**: IJobHandlerRegistry, JobHandlerRegistry ✅
+- [x] **Consumer**: JobConsumerService ✅
+- [x] **Heartbeat**: HeartbeatService ✅
+- [ ] Lifecycle (WorkerShutdownService) - deferred
 - [ ] **Unit Tests**: `JobExecutorTests`, `HandlerRegistryTests`
 
-### Phase 6: Persistence
+### Phase 6: Persistence ✅
 > 📄 [`tasks/phase-6-persistence.md`](./tasks/phase-6-persistence.md)
-- [ ] InMemory stores
-- [ ] EF Core stores
-- [ ] Dead Letter Queue (DLQ) store
+- [ ] InMemory stores (deferred)
+- [x] **EF Core stores** ✅
+  - JobStore, JobHistoryStore, CronScheduleStore
+  - WorkerStore, CoordinatorNodeStore, DeadLetterStore
 - [ ] **Unit Tests**: `InMemoryJobStoreTests`, `InMemoryScheduleStoreTests`
 
 
