@@ -78,18 +78,7 @@ public class JobContext : IJobContext
     /// <inheritdoc />
     public async Task LogAsync(string message, Orchestrix.Enums.LogLevel level = Orchestrix.Enums.LogLevel.Information)
     {
-        var logMessage = new JobLogMessage
-        {
-            JobId = JobId,
-            ExecutionId = HistoryId,
-            Level = level,
-            Message = message
-        };
-
-        var channel = _channels.JobLog(HistoryId);
-        await _publisher.PublishAsync(channel, logMessage, CancellationToken);
-
-        // Also log locally
+        // Only log locally
         _logger.Log(MapLogLevel(level), "[Job {JobId}] {Message}", JobId, message);
     }
 

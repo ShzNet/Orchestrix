@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Orchestrix.Logging.Persistence.AzureBlob;
 using Orchestrix.Persistence;
 using Orchestrix.Locking;
 using Orchestrix.ServiceDefaults;
@@ -36,9 +35,6 @@ builder.Services.AddOrchestrixCoordinator(coordinator =>
                  b.MigrationsAssembly("Orchestrix.Coordinator.Sample");
              });
         });
-
-     coordinator.Logging
-        .UseAzureBlobLogging("UseDevelopmentStorage=true", "orchestrix-logs"); 
 });
 
 var host = builder.Build();

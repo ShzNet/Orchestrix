@@ -46,13 +46,6 @@ public class TransportChannels
     public string JobStatus(Guid executionId) => $"{_prefix}:job:{executionId}:status";
 
     /// <summary>
-    /// Gets the channel for job log entries by execution (Worker → Coordinator).
-    /// </summary>
-    /// <param name="executionId">The execution/history ID.</param>
-    /// <returns>The channel name for the specified execution.</returns>
-    public string JobLog(Guid executionId) => $"{_prefix}:job:{executionId}:log";
-
-    /// <summary>
     /// Gets the channel for worker join/registration (Worker → All Coordinators).
     /// Broadcast channel for all coordinators to know about new workers.
     /// </summary>

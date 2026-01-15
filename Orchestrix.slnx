@@ -29,10 +29,7 @@
   <Folder Name="/src/Worker/">
     <Project Path="src/Worker/Orchestrix.Worker/Orchestrix.Worker.csproj" />
   </Folder>
-  <Folder Name="/src/Logging/">
-    <Project Path="src/Logging/Orchestrix.Logging.Persistence.Abstractions/Orchestrix.Logging.Persistence.Abstractions.csproj" />
-    <Project Path="src/Logging/Orchestrix.Logging.Persistence.AzureBlob/Orchestrix.Logging.Persistence.AzureBlob.csproj" />
-  </Folder>
+
   <Folder Name="/samples/">
     <Project Path="samples/Orchestrix.ServiceDefaults/Orchestrix.ServiceDefaults.csproj" />
     <Project Path="samples/Orchestrix.AppHost/Orchestrix.AppHost.csproj" />
